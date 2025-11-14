@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/13 17:10:19 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/14 12:00:42 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int check_char(char c, int flag_walkable)
+int	check_char(char c, int flag_walkable)
 {
-    if (flag_walkable)
-        return (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W');
-    else
-        return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E' || c == 'W' || c == ' ');
+	if (flag_walkable)
+		return (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W');
+	else
+		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E' || c == 'W' || c == ' ');
 }
 
 int	flood_fill(t_game *g, char **visited, int y, int x)
@@ -398,11 +398,82 @@ int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 	return (0);
 }
 
+//hasta aqui es parse
+
+int	pad_map(t_game *g)
+{
+	int	y;
+	int	len;
+	int	i;
+	char	*newrow;
+
+	if (!g || !g->map)
+		return (-1);
+	y = 0;
+	while (y < g->map_height)
+	{
+		len = ft_strlen(g->map[y]);
+		if (len < g->map_width)
+		{
+			newrow = malloc(g->map_width + 1);
+			if (!newrow)
+			return (-1);
+			i = 0;
+			while (i < len)
+			{
+			newrow[i] = g->map[y][i];
+			i++;
+			}
+			while (i < g->map_width)
+			newrow[i++] = ' ';
+			newrow[i] = '\0';
+			free(g->map[y]);
+			g->map[y] = newrow;
+		}
+		y++;
+	}
+	return (0);
+}
+
+int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
+{
+	int	y;
+	int	x;
+
+	if (!g || !g->map || !out_y || !out_x || !out_orient)
+		return (-1);
+	y = 0;
+	while (y < g->map_height)
+	{
+		x = 0;
+		while (g->map[y][x])
+		{
+			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
+			|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
+			{
+				*out_y = y;
+				*out_x = x;
+				*out_orient = g->map[y][x];
+				g->map[y][x] = '0';
+				return (0);
+			}
+			x++;
+		}
+		y++;
+	}
+	return (-1);
+}
+
+
 int main(int argc, char **argv)
 {
 	int		fd;
 	t_game	g;
 	char		*first_map_line;
+	
+	int	py;
+	int	px;
+	char		orient;
 
 	if (argc != 2)
 		return (write(2, "Error\nUsage: ./cub3D <file.cub>\n", 33), 1);
@@ -421,6 +492,12 @@ int main(int argc, char **argv)
 		free_config(&g);
 		return (write(2, "Error\nInvalid map\n", 18), 1);
 	}
+	if (pad_map(&g) < 0)
+		return (close(fd), free_map(&g), free_config(&g), write(2, "Error\nMalloc\n", 13), 1);
+	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
+		return (free_map(&g), free_config(&g), 1);
+	if (find_player(&g, &py, &px, &orient) < 0)
+            return (write(2, "Error\nPlayer not found\n", 23), free_map(&g), free_config(&g), 1);
 	close(fd);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);
