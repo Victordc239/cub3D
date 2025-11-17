@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/17 18:02:26 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/17 18:07:09 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1168,8 +1168,8 @@ int	main(int argc, char **argv)
 			free_map(&g), free_config(&g), 1);
 
 	/* tamaño de ventana (puedes ajustar) */
-	g.screen_w = 1024;
-	g.screen_h = 768;
+	g.screen_w = 2500;
+	g.screen_h = 1700;
 	g.window = mlx_new_window(g.mlx, g.screen_w, g.screen_h, "cub3D");
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
