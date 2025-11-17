@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/13 16:29:09 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:28:25 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <string.h>
 # include <stdlib.h>
 # include "libft/libft.h"
+# include "minilibx-linux/mlx.h"
 
 typedef struct s_game
 {
@@ -40,6 +41,8 @@ typedef struct s_game
 	int		map_height;
 	int		map_width;
 	char	**map;
+	void		*mlx;
+	void		*window;
 }			t_game;
 
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/16 16:20:54 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/17 13:33:02 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -497,6 +497,34 @@ int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
 	return (-1);
 }
 
+int	handle_key(int keycode, void *param)
+{
+	t_game *g = (t_game *)param;
+
+	(void)g;
+	if (keycode == 65307)
+	{
+		if (g->window)
+			mlx_destroy_window(g->mlx, g->window);
+		free_map(g);
+		free_config(g);
+		exit(0);
+	}
+	return (0);
+}
+
+int	handle_close(void *param)
+{
+	t_game *g = (t_game *)param;
+
+	(void)g;
+	free_map(g);
+	free_config(g);
+	exit(0);
+	return (0);
+}
+
+
 int main(int argc, char **argv)
 {
 	int		fd;
@@ -533,5 +561,14 @@ int main(int argc, char **argv)
 	close(fd);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);
+	g.mlx = mlx_init();
+	if (!g.mlx)
+		return (write(2, "Error\nmlx_init failed\n", 22), free_map(&g), free_config(&g), 1);
+	g.window = mlx_new_window(g.mlx, g.map_width * 120, g.map_height * 120, "cub3D");
+	if (!g.window)
+		return (write(2, "Error\nmlx_new_window failed\n", 28), free_map(&g), free_config(&g), 1);
+	mlx_key_hook(g.window, handle_key, &g);
+	mlx_hook(g.window, 17, 0, handle_close, &g);
+	mlx_loop(g.mlx);
 	return (free_map(&g), free_config(&g), 0);
 }
