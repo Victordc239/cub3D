@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/17 13:33:02 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/17 17:03:21 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,8 @@ char	*read_rest_of_file(int fd)
 	all = ft_strdup("");
 	if (!all)
 		return (NULL);
-	while ((line = get_next_line(fd)) != NULL)
+	line = get_next_line(fd);
+	while (line != NULL)
 	{
 		tmp = ft_strjoin(all, line);
 		free(all);
@@ -188,6 +189,7 @@ char	*read_rest_of_file(int fd)
 		if (!tmp)
 			return (NULL);
 		all = tmp;
+		line = get_next_line(fd);
 	}
 	return (all);
 }
@@ -409,11 +411,13 @@ int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 	if (!g || !out_first_map_line)
 		return (-1);
 	*out_first_map_line = NULL;
-	while ((line = get_next_line(fd)) != NULL)
+	line = get_next_line(fd);
+	while (line != NULL)
 	{
 		if (is_blank_line(line))
 		{
 			free(line);
+			line = get_next_line(fd);
 			continue ;
 		}
 		if (is_header_line(line))
@@ -421,23 +425,23 @@ int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 			if (parse_one_header(line, g) < 0)
 				return (free(line), free_config(g), -1);
 			free(line);
+			line = get_next_line(fd);
 			continue ;
 		}
 		*out_first_map_line = line;
 		return (0);
 	}
-	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_floor || !g->has_ceiling)
+	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_floor
+		|| !g->has_ceiling)
 		return (free_config(g), -1);
 	return (0);
 }
 
-//hasta aqui es parse
-
 int	pad_map(t_game *g)
 {
-	int	y;
-	int	len;
-	int	i;
+	int		y;
+	int		len;
+	int		i;
 	char	*newrow;
 
 	if (!g || !g->map)
@@ -450,15 +454,15 @@ int	pad_map(t_game *g)
 		{
 			newrow = malloc(g->map_width + 1);
 			if (!newrow)
-			return (-1);
+				return (-1);
 			i = 0;
 			while (i < len)
 			{
-			newrow[i] = g->map[y][i];
-			i++;
+				newrow[i] = g->map[y][i];
+				i++;
 			}
 			while (i < g->map_width)
-			newrow[i++] = ' ';
+				newrow[i++] = ' ';
 			newrow[i] = '\0';
 			free(g->map[y]);
 			g->map[y] = newrow;
@@ -499,8 +503,9 @@ int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
 
 int	handle_key(int keycode, void *param)
 {
-	t_game *g = (t_game *)param;
+	t_game	*g;
 
+	g = (t_game *)param;
 	(void)g;
 	if (keycode == 65307)
 	{
@@ -515,8 +520,9 @@ int	handle_key(int keycode, void *param)
 
 int	handle_close(void *param)
 {
-	t_game *g = (t_game *)param;
+	t_game	*g;
 
+	g = (t_game *)param;
 	(void)g;
 	free_map(g);
 	free_config(g);
@@ -524,15 +530,121 @@ int	handle_close(void *param)
 	return (0);
 }
 
+int	load_texture(void *mlx, t_texture *texture, char *path)
+{
+	texture->imagen = mlx_xpm_file_to_image(mlx, path,
+			&texture->width, &texture->height);
+	if (!texture->imagen)
+		return (-1);
+	texture->addr = mlx_get_data_addr(texture->imagen, &texture->bit_by_pixel,
+			&texture->line_len_byte, &texture->endian);
+	return (0);
+}
 
-int main(int argc, char **argv)
+t_texture	*get_texture_from_char(t_game *g, char c)
+{
+	if (c == 'N')
+		return (&g->texture_no);
+	if (c == 'S')
+		return (&g->texture_so);
+	if (c == 'W')
+		return (&g->texture_we);
+	if (c == 'E')
+		return (&g->texture_ea);
+	return (NULL);
+}
+
+int	get_tex_pixel(t_texture *texture, int x, int y)
+{
+	char	*px;
+
+	if (x < 0 || x >= texture->width || y < 0 || y >= texture->height)
+		return (0);
+	px = texture->addr + (y * texture->line_len_byte + x
+			* (texture->bit_by_pixel / 8));
+	return (*(unsigned int *)px);
+}
+
+void	draw_background(t_game *g, int w, int h)
+{
+	void	*img;
+	char	*data;
+	int		bpp;
+	int		line_len;
+	int		endian;
+	int		x;
+	int		y;
+	unsigned int	color;
+
+	img = mlx_new_image(g->mlx, w, h);
+	if (!img)
+		return ;
+	data = mlx_get_data_addr(img, &bpp, &line_len, &endian);
+	if (!data)
+	{
+		mlx_destroy_image(g->mlx, img);
+		return ;
+	}
+	y = 0;
+	while (y < h)
+	{
+		x = 0;
+		while (x < w)
+		{
+			if (y < h / 2)
+				color = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
+			else
+				color = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
+			*(unsigned int *)(data + (y * line_len + x * (bpp / 8))) = color;
+			x++;
+		}
+		y++;
+	}
+	mlx_put_image_to_window(g->mlx, g->window, img, 0, 0);
+	mlx_destroy_image(g->mlx, img);
+}
+
+void	blit_texture_at(t_game *g, t_texture *tex, int dst_x, int dst_y)
+{
+	void		*img;
+	char	*data;
+	int		bpp;
+	int		line;
+	int		end;
+	int		x;
+	int		y;
+	unsigned int	color;
+
+	if (!tex || !tex->imagen)
+		return ;
+	img = mlx_new_image(g->mlx, tex->width, tex->height);
+	if (!img)
+		return ;
+	data = mlx_get_data_addr(img, &bpp, &line, &end);
+	y = 0;
+	while (y < tex->height)
+	{
+		x = 0;
+		while (x < tex->width)
+		{
+			color = *(unsigned int *)(tex->addr + y * tex->line_len_byte
+					+ x * (tex->bit_by_pixel / 8));
+			*(unsigned int *)(data + y * line + x * (bpp / 8)) = color;
+			x++;
+		}
+		y++;
+	}
+	mlx_put_image_to_window(g->mlx, g->window, img, dst_x, dst_y);
+	mlx_destroy_image(g->mlx, img);
+}
+
+int	main(int argc, char **argv)
 {
 	int		fd;
 	t_game	g;
 	char		*first_map_line;
-	
-	int	py;
-	int	px;
+	int		py;
+	int		px;
 	char		orient;
 
 	if (argc != 2)
@@ -542,33 +654,52 @@ int main(int argc, char **argv)
 	fd = open(argv[1], O_RDONLY);
 	if (fd < 0)
 		return (perror("Error\nopen"), 1);
-	g.no = g.so = g.we = g.ea = NULL;
-	g.has_no = g.has_so = g.has_we = g.has_ea = 0;
-	g.has_floor = g.has_ceiling = 0;
+	g.no = NULL;
+	g.so = NULL;
+	g.we = NULL;
+	g.ea = NULL;
+	g.has_no = 0;
+	g.has_so = 0;
+	g.has_we = 0;
+	g.has_ea = 0;
+	g.has_floor = 0;
+	g.has_ceiling = 0;
 	first_map_line = NULL;
-	if (parse_headers(fd, &g, &first_map_line) < 0 || parse_map(fd, first_map_line, &g) < 0)
-	{
-		close(fd);
-		free_config(&g);
-		return (write(2, "Error\nInvalid map\n", 18), 1);
-	}
+	if (parse_headers(fd, &g, &first_map_line) < 0
+		|| parse_map(fd, first_map_line, &g) < 0)
+		return (close(fd), free_config(&g),
+			write(2, "Error\nInvalid map\n", 18), 1);
 	if (pad_map(&g) < 0)
-		return (close(fd), free_map(&g), free_config(&g), write(2, "Error\nMalloc\n", 13), 1);
+		return (close(fd), free_map(&g), free_config(&g),
+			write(2, "Error\nMalloc\n", 13), 1);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);
 	if (find_player(&g, &py, &px, &orient) < 0)
-		return (write(2, "Error\nPlayer not found\n", 23), free_map(&g), free_config(&g), 1);
+		return (write(2, "Error\nPlayer not found\n", 23),
+			free_map(&g), free_config(&g), 1);
 	close(fd);
-	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
-		return (free_map(&g), free_config(&g), 1);
 	g.mlx = mlx_init();
 	if (!g.mlx)
-		return (write(2, "Error\nmlx_init failed\n", 22), free_map(&g), free_config(&g), 1);
-	g.window = mlx_new_window(g.mlx, g.map_width * 120, g.map_height * 120, "cub3D");
+		return (write(2, "Error\nmlx_init failed\n", 22),
+			free_map(&g), free_config(&g), 1);
+	g.window = mlx_new_window(g.mlx, 3835, 2000, "cub3D");
 	if (!g.window)
-		return (write(2, "Error\nmlx_new_window failed\n", 28), free_map(&g), free_config(&g), 1);
+		return (write(2, "Error\nmlx_new_window failed\n", 28),
+			free_map(&g), free_config(&g), 1);
+	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
+		|| load_texture(g.mlx, &g.texture_so, g.so) < 0
+		|| load_texture(g.mlx, &g.texture_we, g.we) < 0
+		|| load_texture(g.mlx, &g.texture_ea, g.ea) < 0)
+	{
+		write(2, "Error\nTexture load failed\n", 26);
+		free_map(&g);
+		free_config(&g);
+		return (1);
+	}
 	mlx_key_hook(g.window, handle_key, &g);
 	mlx_hook(g.window, 17, 0, handle_close, &g);
+	draw_background(&g, 3835, 2000);
+	blit_texture_at(&g, &g.texture_no, 0, 0);
 	mlx_loop(g.mlx);
 	return (free_map(&g), free_config(&g), 0);
 }

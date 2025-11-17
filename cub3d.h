@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/17 13:28:25 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/17 16:37:28 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,17 @@
 # include <stdlib.h>
 # include "libft/libft.h"
 # include "minilibx-linux/mlx.h"
+
+typedef struct s_texture
+{
+	void	*imagen;
+	char	*addr;
+	int		width;
+	int		height;
+	int		bit_by_pixel;
+	int		line_len_byte;
+	int		endian;
+}			t_texture;
 
 typedef struct s_game
 {
@@ -43,6 +54,10 @@ typedef struct s_game
 	char	**map;
 	void		*mlx;
 	void		*window;
+	t_texture		texture_no;
+	t_texture		texture_so;
+	t_texture		texture_we;
+	t_texture		texture_ea;
 }			t_game;
 
 #endif
