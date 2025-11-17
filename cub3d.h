@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/17 16:37:28 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/17 17:48:26 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,34 @@ typedef struct s_game
 	t_texture		texture_so;
 	t_texture		texture_we;
 	t_texture		texture_ea;
+
+		/* pantalla */
+	int screen_w;
+	int screen_h;
+
+	/* jugador / cámara */
+	double posx;
+	double posy;
+	double dirx;
+	double diry;
+	double planex;
+	double planey;
+
+	/* input */
+	int key_w;
+	int key_s;
+	int key_a;
+	int key_d;
+	int key_left;
+	int key_right;
+
+	/* frame buffer (imagen) */
+	void *frame_img;
+	char *frame_addr;
+	int frame_bpp;
+	int frame_line_len;
+	int frame_endian;
+
 }			t_game;
 
 #endif
