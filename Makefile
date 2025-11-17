@@ -3,14 +3,14 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+         #
+#    By: victor <victor@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/26 13:49:21 by vdiez-cu          #+#    #+#              #
-#    Updated: 2025/11/13 14:48:43 by vdiez-cu         ###   ########.fr        #
+#    Updated: 2025/11/16 16:03:44 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME		= so_long
+NAME		= cub3D
 
 SRCS		= main.c
 			
@@ -45,13 +45,14 @@ $(MLX_LIB):
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS)
-	$(MAKE) -C $(MLX_DIR) $(LIBFT_DIR) clean
+	@rm -f $(OBJS)
+	@$(MAKE) -C $(MLX_DIR) clean
+	@$(MAKE) -C $(LIBFT_DIR) clean
 
-fclean:
-	rm -f $(OBJS)
-	$(MAKE) -C $(MLX_DIR) $(LIBFT_DIR) clean
-	rm -f $(NAME)
+fclean: clean
+	@rm -f $(NAME)
+	@$(MAKE) -C $(LIBFT_DIR) fclean
+	@rm -f $(LIBFT_LIB)
 
 re: fclean all
 

@@ -6,18 +6,51 @@
 /*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/14 12:00:42 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/16 16:20:54 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
+
+void	free_config(t_game *g)
+{
+	if (!g)
+		return ;
+	if (g->no)
+		(free(g->no), g->no = NULL);
+	if (g->so)
+		(free(g->so), g->so = NULL);
+	if (g->we)
+		(free(g->we), g->we = NULL);
+	if (g->ea)
+		(free(g->ea), g->ea = NULL);
+	g->has_no = 0;
+	g->has_so = 0;
+	g->has_we = 0;
+	g->has_ea = 0;
+	g->has_floor = 0;
+	g->has_ceiling = 0;
+}
+
+int	is_cub(const char *fname)
+{
+	int	len;
+
+	if (!fname)
+		return (0);
+	len = ft_strlen(fname);
+	if (len < 4)
+		return (0);
+	return (ft_strcmp(fname + len - 4, ".cub") == 0);
+}
 
 int	check_char(char c, int flag_walkable)
 {
 	if (flag_walkable)
 		return (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W');
 	else
-		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E' || c == 'W' || c == ' ');
+		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E'
+			|| c == 'W' || c == ' ');
 }
 
 int	flood_fill(t_game *g, char **visited, int y, int x)
@@ -284,7 +317,7 @@ int	set_texture(char **dst, const char *rest)
 {
 	const char	*p;
 	char		*copy;
-	
+
 	p = rest;
 	while (*p == ' ' || *p == '\t')
 		p++;
@@ -321,7 +354,7 @@ int	parse_one_header(const char *line, t_game *g)
 {
 	char	*trim;
 
-	trim = ft_strtrim(line);
+	trim = ft_strtrim(line, " \t\n\r");
 	if (!trim)
 		return (-1);
 	if (ft_strncmp(trim, "NO", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
@@ -464,7 +497,6 @@ int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
 	return (-1);
 }
 
-
 int main(int argc, char **argv)
 {
 	int		fd;
@@ -497,7 +529,7 @@ int main(int argc, char **argv)
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);
 	if (find_player(&g, &py, &px, &orient) < 0)
-            return (write(2, "Error\nPlayer not found\n", 23), free_map(&g), free_config(&g), 1);
+		return (write(2, "Error\nPlayer not found\n", 23), free_map(&g), free_config(&g), 1);
 	close(fd);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);

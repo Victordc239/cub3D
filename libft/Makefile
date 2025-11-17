@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+         #
+#    By: victor <victor@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/03 15:23:00 by sofernan          #+#    #+#              #
-#    Updated: 2025/10/06 19:38:27 by sofernan         ###   ########.fr        #
+#    Updated: 2025/11/16 15:49:51 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,6 +40,7 @@ ft_substr.c \
 get_next_line.c \
 ft_strcpy.c \
 ft_strcat.c \
+ft_strtrim.c
 
 OBJS = $(SRCS:.c=.o)
 OBJ_FILES = $(addprefix $(OBJ_DIR)/,$(OBJS))

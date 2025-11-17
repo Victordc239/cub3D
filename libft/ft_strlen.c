@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlen.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/13 17:58:55 by sofernan          #+#    #+#             */
-/*   Updated: 2025/07/07 13:54:17 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/16 15:43:58 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //#include <stdio.h>
 #include "libft.h"
 
-size_t	ft_strlen(char const *str)
+int	ft_strlen(char const *str)
 {
 	int	count;
 

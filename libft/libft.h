@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 14:03:09 by sofernan          #+#    #+#             */
-/*   Updated: 2025/10/13 14:46:10 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/16 15:49:25 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ char		*ft_strjoin(char *s1, char const *s2);
 char		**ft_split(char const *s, char c);
 char		*ft_strchr(char const *s, int c);
 char		*ft_strdup(char const *s1);
-size_t		ft_strlen(char const *str);
+int		ft_strlen(char const *str);
 char		*ft_itoa(int n);
 
 void		*ft_memcpy(void *dst, const void *src, size_t n);
@@ -49,6 +49,7 @@ int			ft_isdigit(int c);
 
 void		ft_putstr(char *s, int std);
 void		ft_putchar(char c);
+char		*ft_strtrim(char const *s1, char const *set);
 
 // GNL
 
