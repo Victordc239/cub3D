@@ -6,11 +6,10 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:51:44 by sofernan          #+#    #+#             */
-/*   Updated: 2025/07/07 13:54:17 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:43:52 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include <stdio.h>
 #include "libft.h"
 
 int	ft_atoi(char const *str)
@@ -33,12 +32,3 @@ int	ft_atoi(char const *str)
 	}
 	return (res * sign);
 }
-/*
-int main(void)
-{
-    char const *str = "-12345";
-    int result = ft_atoi(str);
-    printf("String convertido a entero: %d\n", result);
-    return (0);
-}
-*/

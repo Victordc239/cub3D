@@ -6,11 +6,10 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/22 13:24:29 by sofernan          #+#    #+#             */
-/*   Updated: 2025/07/07 13:54:17 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:45:38 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include <stdio.h>
 #include "libft.h"
 
 int	ft_strncmp(char const *s1, char const *s2, size_t n)
@@ -29,19 +28,3 @@ int	ft_strncmp(char const *s1, char const *s2, size_t n)
 	else
 		return (0);
 }
-/*
-int main(void) 
-{
-    char *str1 = "Hola 42";
-	char *str2 = "Hola";
-	int result = ft_strncmp(str1, str2, 5);
-
-	if (result < 0)
-        printf("'%s' es menor que '%s'\n", str1, str2);
-    else if (result > 0)
-        printf("'%s' es mayor que '%s'\n", str1, str2);
-    else
-        printf("'%s' es igual a '%s'\n", str1, str2);
-	return (0);
-}
-*/

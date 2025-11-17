@@ -6,11 +6,10 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:02:22 by sofernan          #+#    #+#             */
-/*   Updated: 2025/09/30 14:33:18 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:44:32 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include <stdio.h>
 #include "libft.h"
 
 static int	ft_size(int n)
@@ -60,12 +59,3 @@ char	*ft_itoa(int nb)
 	i++;
 	return (str);
 }
-/*
-int main(void)
-{
-    int number = -1234;
-    char *str = ft_itoa(number);
-    printf("Número convertido a cadena: %s\n", str);
-    return (0);
-}
-*/

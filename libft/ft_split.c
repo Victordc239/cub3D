@@ -6,11 +6,10 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/02 17:34:46 by sofernan          #+#    #+#             */
-/*   Updated: 2025/09/30 13:59:16 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:44:56 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
 #include "libft.h"
 
 static int	ft_wordlen(char const *s, char c)
@@ -89,21 +88,3 @@ char	**ft_split(char const *s, char c)
 	}
 	return (strs);
 }
-/*
-int main(void)
-{
-    char const *str = "      split       this for   me  !       ";
-    char **words = ft_split(str, ' ');
-
-	if (words)
-    {
-        int i = 0;
-        while (words[i])
-        {
-            printf("%s\n", words[i]);
-            i++;
-        }
-    }
-	return (0);
-}
-*/

@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   ft_substr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid>       +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/02 15:49:08 by sofernan          #+#    #+#             */
-/*   Updated: 2024/04/15 16:19:18 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:45:46 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include <stdio.h>
 #include "libft.h"
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
@@ -40,21 +39,3 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	substr[i] = '\0';
 	return (substr);
 }
-/*
-int main(void)
-{
-    char *s = "Hola, 42!";
-    unsigned int start = 5;
-    size_t len = 4;
-
-    char *substr = ft_substr(s, start, len);
-    if (substr == NULL)
-	{
-        printf("Error\n");
-        return (1);
-    }
-    printf("Subcadena: %s\n", substr);
-	free(substr);
-    return (0);
-}
-*/

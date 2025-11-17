@@ -6,11 +6,10 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/02 16:05:31 by sofernan          #+#    #+#             */
-/*   Updated: 2025/07/07 13:38:08 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/17 13:45:20 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include <stdio.h>
 #include "libft.h"
 
 char	*ft_strjoin(char *s1, char const *s2)
@@ -41,14 +40,3 @@ char	*ft_strjoin(char *s1, char const *s2)
 	result[i + j] = '\0';
 	return (result);
 }
-/*
-int main(void)
-{
-    char s1[] = "Hola, ";
-    char s2[] = "42";
-    char *result = ft_strjoin(s1, s2);
-	
-	printf("Resultado de la concatenación: %s\n", result);
-    return (0);
-}
-*/

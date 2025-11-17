@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlen.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/13 17:58:55 by sofernan          #+#    #+#             */
-/*   Updated: 2025/11/16 15:43:58 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/17 13:45:26 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include <stdio.h>
 #include "libft.h"
 
 int	ft_strlen(char const *str)
@@ -25,12 +24,3 @@ int	ft_strlen(char const *str)
 	}
 	return (count);
 }
-/*
-int	main(void)
-{
-    char	*cadena = "Hola 42";
-
-	printf("Número de caracteres: %zu\n", ft_strlen(cadena));
-	return (0);
-}
-*/
