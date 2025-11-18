@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/18 11:35:51 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/18 15:01:20 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,8 @@ int	is_blank_line(const char *s)
 	return (1);
 }
 
+//---------------------------------------------------------
+
 void	strip_nl(char *s)
 {
 	size_t	len;
@@ -267,6 +269,8 @@ void	strip_nl(char *s)
 	if (len > 0 && s[len - 1] == '\n')
 		s[len - 1] = '\0';
 }
+
+//---------------------------------------------------------
 
 int	parse_uint0_255(const char **p, int *out)
 {
@@ -501,13 +505,13 @@ int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
 	return (-1);
 }
 
-int	handle_key(int keycode, void *param)
+/* handlers de teclado (presionar / soltar) */
+int	key_press(int keycode, void *param)
 {
 	t_game	*g;
 
 	g = (t_game *)param;
-	(void)g;
-	if (keycode == 65307)
+	if (keycode == 65307) /* ESC */
 	{
 		if (g->window)
 			mlx_destroy_window(g->mlx, g->window);
@@ -515,6 +519,18 @@ int	handle_key(int keycode, void *param)
 		free_config(g);
 		exit(0);
 	}
+	else if (keycode == 119 || keycode == 'w')
+		g->key_w = 1;
+	else if (keycode == 115 || keycode == 's')
+		g->key_s = 1;
+	else if (keycode == 97  || keycode == 'a')
+		g->key_a = 1;
+	else if (keycode == 100 || keycode == 'd')
+		g->key_d = 1;
+	else if (keycode == 65361)
+		g->key_left = 1;
+	else if (keycode == 65363)
+		g->key_right = 1;
 	return (0);
 }
 
@@ -554,8 +570,6 @@ int	get_tex_pixel(t_texture *texture, int x, int y)
 
 //---------------------------------------------------------------------------------
 
-#include <math.h>
-#include <sys/time.h>
 
 /* pinta techo y suelo directamente en g->frame_addr (frame_img debe existir) */
 void	draw_background_to_frame(t_game *g)
@@ -599,23 +613,31 @@ void	init_player(t_game *g, int py, int px, char orient)
 	g->posy = (double)py + 0.5;
 	if (orient == 'N')
 	{
-		g->dirx = 0.0; g->diry = -1.0;
-		g->planex = 0.66; g->planey = 0.0;
+		g->dirx = 0.0;
+		g->diry = -1.0;
+		g->planex = 0.66;
+		g->planey = 0.0;
 	}
 	else if (orient == 'S')
 	{
-		g->dirx = 0.0; g->diry = 1.0;
-		g->planex = -0.66; g->planey = 0.0;
+		g->dirx = 0.0;
+		g->diry = 1.0;
+		g->planex = -0.66;
+		g->planey = 0.0;
 	}
 	else if (orient == 'E')
 	{
-		g->dirx = 1.0; g->diry = 0.0;
-		g->planex = 0.0; g->planey = 0.66;
+		g->dirx = 1.0;
+		g->diry = 0.0;
+		g->planex = 0.0;
+		g->planey = 0.66;
 	}
 	else if (orient == 'W')
 	{
-		g->dirx = -1.0; g->diry = 0.0;
-		g->planex = 0.0; g->planey = -0.66;
+		g->dirx = -1.0;
+		g->diry = 0.0;
+		g->planex = 0.0;
+		g->planey = -0.66;
 	}
 	g->key_w = 0;
 	g->key_s = 0;
@@ -645,35 +667,6 @@ double	get_time_s(void)
 
 	gettimeofday(&tv, NULL);
 	return (tv.tv_sec + tv.tv_usec / 1000000.0);
-}
-
-/* handlers de teclado (presionar / soltar) */
-int	key_press(int keycode, void *param)
-{
-	t_game *g;
-
-	g = (t_game *)param;
-	if (keycode == 65307) /* ESC */
-	{
-		if (g->window)
-			mlx_destroy_window(g->mlx, g->window);
-		free_map(g);
-		free_config(g);
-		exit(0);
-	}
-	else if (keycode == 119 || keycode == 'w')
-		g->key_w = 1;
-	else if (keycode == 115 || keycode == 's')
-		g->key_s = 1;
-	else if (keycode == 97  || keycode == 'a')
-		g->key_a = 1;
-	else if (keycode == 100 || keycode == 'd')
-		g->key_d = 1;
-	else if (keycode == 65361)
-		g->key_left = 1;
-	else if (keycode == 65363)
-		g->key_right = 1;
-	return (0);
 }
 
 int	key_release(int keycode, void *param)
@@ -775,8 +768,6 @@ void	update_player(t_game *g, double delta)
 /* ============================
    RENDER: put_pixel_frame, choose_wall_texture, render_frame
    ============================ */
-
-#include <math.h>
 
 /* escribe un pixel en la imagen del frame (frame_img) */
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
@@ -990,7 +981,7 @@ void	render_frame(t_game *g)
 	} /* fin columnas */
 }
 
-int game_loop(void *param)
+int	game_loop(void *param)
 {
 	static double	last = 0.0;
 	double			now;
