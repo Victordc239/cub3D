@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/18 15:01:20 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/18 17:57:19 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -511,7 +511,7 @@ int	key_press(int keycode, void *param)
 	t_game	*g;
 
 	g = (t_game *)param;
-	if (keycode == 65307) /* ESC */
+	if (keycode == 65307)
 	{
 		if (g->window)
 			mlx_destroy_window(g->mlx, g->window);
@@ -531,6 +531,8 @@ int	key_press(int keycode, void *param)
 		g->key_left = 1;
 	else if (keycode == 65363)
 		g->key_right = 1;
+	else if (keycode == 120 || keycode == 'x')
+		show_mouse(g);
 	return (0);
 }
 
@@ -692,19 +694,19 @@ int	key_release(int keycode, void *param)
 /* actualizar jugador según flags (colisión simple por celda) */
 void	update_player(t_game *g, double delta)
 {
-	double	moveSpeed;
-	double	rotSpeed;
+	double	move_speed;
+	double	rot_speed;
 	double	nx;
 	double	ny;
-	double	oldDirX;
-	double	oldPlaneX;
+	double	old_dir_x;
+	double	old_plane_x;
 
-	moveSpeed = 3.0 * delta;
-	rotSpeed  = 2.0 * delta;
+	move_speed = 3.0 * delta;
+	rot_speed  = 2.0 * delta;
 	if (g->key_w)
 	{
-		nx = g->posx + g->dirx * moveSpeed;
-		ny = g->posy + g->diry * moveSpeed;
+		nx = g->posx + g->dirx * move_speed;
+		ny = g->posy + g->diry * move_speed;
 		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
 			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
 			g->posy = ny;
@@ -714,8 +716,8 @@ void	update_player(t_game *g, double delta)
 	}
 	if (g->key_s)
 	{
-		nx = g->posx - g->dirx * moveSpeed;
-		ny = g->posy - g->diry * moveSpeed;
+		nx = g->posx - g->dirx * move_speed;
+		ny = g->posy - g->diry * move_speed;
 		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
 			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
 			g->posy = ny;
@@ -725,8 +727,8 @@ void	update_player(t_game *g, double delta)
 	}
 	if (g->key_a)
 	{
-		nx = g->posx - g->planex * moveSpeed;
-		ny = g->posy - g->planey * moveSpeed;
+		nx = g->posx - g->planex * move_speed;
+		ny = g->posy - g->planey * move_speed;
 		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
 			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
 			g->posy = ny;
@@ -736,8 +738,8 @@ void	update_player(t_game *g, double delta)
 	}
 	if (g->key_d)
 	{
-		nx = g->posx + g->planex * moveSpeed;
-		ny = g->posy + g->planey * moveSpeed;
+		nx = g->posx + g->planex * move_speed;
+		ny = g->posy + g->planey * move_speed;
 		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
 			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
 			g->posy = ny;
@@ -747,21 +749,21 @@ void	update_player(t_game *g, double delta)
 	}
 	if (g->key_left)
 	{
-		oldDirX = g->dirx;
-		g->dirx = g->dirx * cos(rotSpeed) - g->diry * sin(rotSpeed);
-		g->diry = oldDirX * sin(rotSpeed) + g->diry * cos(rotSpeed);
-		oldPlaneX = g->planex;
-		g->planex = g->planex * cos(rotSpeed) - g->planey * sin(rotSpeed);
-		g->planey = oldPlaneX * sin(rotSpeed) + g->planey * cos(rotSpeed);
+		old_dir_x = g->dirx;
+		g->dirx = g->dirx * cos(rot_speed) - g->diry * sin(rot_speed);
+		g->diry = old_dir_x * sin(rot_speed) + g->diry * cos(rot_speed);
+		old_plane_x = g->planex;
+		g->planex = g->planex * cos(rot_speed) - g->planey * sin(rot_speed);
+		g->planey = old_plane_x * sin(rot_speed) + g->planey * cos(rot_speed);
 	}
 	if (g->key_right)
 	{
-		oldDirX = g->dirx;
-		g->dirx = g->dirx * cos(-rotSpeed) - g->diry * sin(-rotSpeed);
-		g->diry = oldDirX * sin(-rotSpeed) + g->diry * cos(-rotSpeed);
-		oldPlaneX = g->planex;
-		g->planex = g->planex * cos(-rotSpeed) - g->planey * sin(-rotSpeed);
-		g->planey = oldPlaneX * sin(-rotSpeed) + g->planey * cos(-rotSpeed);
+		old_dir_x = g->dirx;
+		g->dirx = g->dirx * cos(-rot_speed) - g->diry * sin(-rot_speed);
+		g->diry = old_dir_x * sin(-rot_speed) + g->diry * cos(-rot_speed);
+		old_plane_x = g->planex;
+		g->planex = g->planex * cos(-rot_speed) - g->planey * sin(-rot_speed);
+		g->planey = old_plane_x * sin(-rot_speed) + g->planey * cos(-rot_speed);
 	}
 }
 
@@ -785,22 +787,22 @@ void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
 /* elige la textura adecuada según side y dirección del rayo
    side == 0 -> golpe en pared vertical (x-side); side == 1 -> horizontal (y-side)
    Devolvemos puntero a la textura cargada en g. */
-t_texture	*choose_wall_texture(t_game *g, int side, double rayDirX, double rayDirY)
+t_texture	*choose_wall_texture(t_game *g, int side, double ray_dir_x, double ray_dir_y)
 {
 	if (!g)
 		return (NULL);
 	if (side == 0)
 	{
-		/* vertical wall: comparando signo de rayDirX */
-		if (rayDirX > 0)
+		/* vertical wall: comparando signo de ray_dir_x */
+		if (ray_dir_x > 0)
 			return (&g->texture_we); /* rayo hacia +X, la cara que se ve es la W */
 		else
 			return (&g->texture_ea); /* rayo hacia -X, la cara que se ve es la E */
 	}
 	else
 	{
-		/* horizontal wall: comparar signo de rayDirY */
-		if (rayDirY > 0)
+		/* horizontal wall: comparar signo de ray_dir_y */
+		if (ray_dir_y > 0)
 			return (&g->texture_no); /* rayo hacia +Y, la cara que se ve es la N */
 		else
 			return (&g->texture_so); /* rayo hacia -Y, la cara que se ve es la S */
@@ -812,33 +814,33 @@ t_texture	*choose_wall_texture(t_game *g, int side, double rayDirX, double rayDi
 void	render_frame(t_game *g)
 {
 	int	x;
-	double cameraX;
-	double rayDirX;
-	double rayDirY;
-	int mapX;
-	int mapY;
-	double sideDistX;
-	double sideDistY;
-	double deltaDistX;
-	double deltaDistY;
-	int stepX;
-	int stepY;
+	double camera_x;
+	double ray_dir_x;
+	double ray_dir_y;
+	int map_x;
+	int map_y;
+	double side_dist_x;
+	double side_dist_y;
+	double delta_dist_x;
+	double delta_dist_y;
+	int step_x;
+	int step_y;
 	int hit;
 	int side;
 	char mch;
-	double perpWallDist;
-	int lineHeight;
-	int drawStart;
-	int drawEnd;
-	double wallX;
+	double perp_wall_dist;
+	int line_height;
+	int draw_start;
+	int draw_end;
+	double wall_x;
 	t_texture *tex;
-	int texWidth;
-	int texHeight;
-	int texX;
+	int tex_width;
+	int tex_height;
+	int tex_x;
 	double step;
-	double texPos;
+	double tex_pos;
 	int y;
-	int texY;
+	int tex_y;
 	unsigned int color;
 	
 
@@ -848,62 +850,62 @@ void	render_frame(t_game *g)
 	while (x < g->screen_w)
 	{
 		/* calcular rayo por columna */
-		cameraX = 2.0 * x / (double)g->screen_w - 1.0;
-		rayDirX = g->dirx + g->planex * cameraX;
-		rayDirY = g->diry + g->planey * cameraX;
+		camera_x = 2.0 * x / (double)g->screen_w - 1.0;
+		ray_dir_x = g->dirx + g->planex * camera_x;
+		ray_dir_y = g->diry + g->planey * camera_x;
 
-		mapX = (int)g->posx;
-		mapY = (int)g->posy;
+		map_x = (int)g->posx;
+		map_y = (int)g->posy;
 
-		deltaDistX = (rayDirX == 0.0) ? 1e30 : fabs(1.0 / rayDirX);
-		deltaDistY = (rayDirY == 0.0) ? 1e30 : fabs(1.0 / rayDirY);
+		delta_dist_x = (ray_dir_x == 0.0) ? 1e30 : fabs(1.0 / ray_dir_x);
+		delta_dist_y = (ray_dir_y == 0.0) ? 1e30 : fabs(1.0 / ray_dir_y);
 		hit = 0;
 		side = 0;
 
 		/* inicializar step y sideDist */
-		if (rayDirX < 0)
+		if (ray_dir_x < 0)
 		{
-			stepX = -1;
-			sideDistX = (g->posx - mapX) * deltaDistX;
+			step_x = -1;
+			side_dist_x = (g->posx - map_x) * delta_dist_x;
 		}
 		else
 		{
-			stepX = 1;
-			sideDistX = (mapX + 1.0 - g->posx) * deltaDistX;
+			step_x = 1;
+			side_dist_x = (map_x + 1.0 - g->posx) * delta_dist_x;
 		}
-		if (rayDirY < 0)
+		if (ray_dir_y < 0)
 		{
-			stepY = -1;
-			sideDistY = (g->posy - mapY) * deltaDistY;
+			step_y = -1;
+			side_dist_y = (g->posy - map_y) * delta_dist_y;
 		}
 		else
 		{
-			stepY = 1;
-			sideDistY = (mapY + 1.0 - g->posy) * deltaDistY;
+			step_y = 1;
+			side_dist_y = (map_y + 1.0 - g->posy) * delta_dist_y;
 		}
 
 		/* DDA - buscar colisión con pared */
 		while (!hit)
 		{
-			if (sideDistX < sideDistY)
+			if (side_dist_x < side_dist_y)
 			{
-				sideDistX += deltaDistX;
-				mapX += stepX;
+				side_dist_x += delta_dist_x;
+				map_x += step_x;
 				side = 0;
 			}
 			else
 			{
-				sideDistY += deltaDistY;
-				mapY += stepY;
+				side_dist_y += delta_dist_y;
+				map_y += step_y;
 				side = 1;
 			}
 			/* fuera del mapa -> tratamos como hit para evitar bucle infinito */
-			if (mapY < 0 || mapY >= g->map_height || mapX < 0 || mapX >= g->map_width)
+			if (map_y < 0 || map_y >= g->map_height || map_x < 0 || map_x >= g->map_width)
 			{
 				hit = 1;
 				break ;
 			}
-			mch = g->map[mapY][mapX];
+			mch = g->map[map_y][map_x];
 			if (mch == '1')
 				hit = 1;
 			else if (mch == ' ')
@@ -914,63 +916,63 @@ void	render_frame(t_game *g)
 		}
 		/* distancia perpendicular al muro */
 		if (side == 0)
-			perpWallDist = (mapX - g->posx + (1 - stepX) / 2.0) / (rayDirX == 0 ? 1e-6 : rayDirX);
+			perp_wall_dist = (map_x - g->posx + (1 - step_x) / 2.0) / (ray_dir_x == 0 ? 1e-6 : ray_dir_x);
 		else
-			perpWallDist = (mapY - g->posy + (1 - stepY) / 2.0) / (rayDirY == 0 ? 1e-6 : rayDirY);
-		if (perpWallDist <= 0.0)
-			perpWallDist = 1e-6;
+			perp_wall_dist = (map_y - g->posy + (1 - step_y) / 2.0) / (ray_dir_y == 0 ? 1e-6 : ray_dir_y);
+		if (perp_wall_dist <= 0.0)
+			perp_wall_dist = 1e-6;
 
 		/* altura de la línea a dibujar */
-		lineHeight = (int)(g->screen_h / perpWallDist);
+		line_height = (int)(g->screen_h / perp_wall_dist);
 
-		drawStart = -lineHeight / 2 + g->screen_h / 2;
-		if (drawStart < 0)
-			drawStart = 0;
-		drawEnd = lineHeight / 2 + g->screen_h / 2;
-		if (drawEnd >= g->screen_h)
-			drawEnd = g->screen_h - 1;
+		draw_start = -line_height / 2 + g->screen_h / 2;
+		if (draw_start < 0)
+			draw_start = 0;
+		draw_end = line_height / 2 + g->screen_h / 2;
+		if (draw_end >= g->screen_h)
+			draw_end = g->screen_h - 1;
 
-		/* calcular coordenada exacta del impacto en la pared (wallX en [0,1]) */
+		/* calcular coordenada exacta del impacto en la pared (wall_x en [0,1]) */
 		if (side == 0)
-			wallX = g->posy + perpWallDist * rayDirY;
+			wall_x = g->posy + perp_wall_dist * ray_dir_y;
 		else
-			wallX = g->posx + perpWallDist * rayDirX;
-		wallX -= floor(wallX);
-		tex = choose_wall_texture(g, side, rayDirX, rayDirY);
+			wall_x = g->posx + perp_wall_dist * ray_dir_x;
+		wall_x -= floor(wall_x);
+		tex = choose_wall_texture(g, side, ray_dir_x, ray_dir_y);
 		if (!tex || !tex->addr || tex->width <= 0 || tex->height <= 0)
 		{
 			x++;
-			continue;
+			continue ;
 		}
 
-		texWidth = tex->width;
-		texHeight = tex->height;
+		tex_width = tex->width;
+		tex_height = tex->height;
 
-		/* calcular texX (coordenada X en la textura) */
-		texX = (int)(wallX * (double)texWidth);
+		/* calcular tex_x (coordenada X en la textura) */
+		tex_x = (int)(wall_x * (double)tex_width);
 		/* invertir si hace falta (para que la orientación quede bien) */
-		if ((side == 0 && rayDirX > 0) || (side == 1 && rayDirY < 0))
-			texX = texWidth - texX - 1;
-		if (texX < 0)
-			texX = 0;
-		if (texX >= texWidth)
-			texX = texWidth - 1;
+		if ((side == 0 && ray_dir_x > 0) || (side == 1 && ray_dir_y < 0))
+			tex_x = tex_width - tex_x - 1;
+		if (tex_x < 0)
+			tex_x = 0;
+		if (tex_x >= tex_width)
+			tex_x = tex_width - 1;
 
-		/* step y texPos para muestrear verticalmente */
-		step = 1.0 * texHeight / (double)lineHeight;
-		texPos = (drawStart - g->screen_h / 2 + lineHeight / 2) * step;
+		/* step y tex_pos para muestrear verticalmente */
+		step = 1.0 * tex_height / (double)line_height;
+		tex_pos = (draw_start - g->screen_h / 2 + line_height / 2) * step;
 
 		/* dibujar columna (solo paredes; techo/suelo ya pintados) */
-		y = drawStart;
-		while (y <= drawEnd)
+		y = draw_start;
+		while (y <= draw_end)
 		{
-			texY = (int)texPos;
-			if (texY < 0)
-				texY = 0;
-			if (texY >= texHeight)
-				texY = texHeight - 1;
-			texPos += step;
-			color = (unsigned int)get_tex_pixel(tex, texX, texY);
+			tex_y = (int)tex_pos;
+			if (tex_y < 0)
+				tex_y = 0;
+			if (tex_y >= tex_height)
+				tex_y = tex_height - 1;
+			tex_pos += step;
+			color = (unsigned int)get_tex_pixel(tex, tex_x, tex_y);
 			/* oscurecer si side == 1 para dar sensación de profundidad */
 			if (side == 1)
 				color = ((color & 0xFEFEFE) >> 1); /* división aproximada por 2 */
@@ -1008,7 +1010,94 @@ int	game_loop(void *param)
 	return (0);
 }
 
+/* handler para movimiento del ratón (MotionNotify) */
+int mouse_move(int x, int y, void *param)
+{
+    t_game *g;
+    int center_x;
+    int center_y;
+    double dx;
+    double rot_angle;
+    double old_dir_x;
+    double old_plane_x;
+
+    g = (t_game *)param;
+    if (!g)
+        return (0);
+
+    center_x = g->screen_w / 2;
+    center_y = g->screen_h / 2;
+
+    /* si el cursor ya está en el centro, no hacemos nada (evita bucle al hacer mlx_mouse_move) */
+    if (x == center_x && y == center_y)
+        return (0);
+
+    /* sensibilidad: ajusta este valor a tu gusto (radianes por pixel) */
+    const double sensitivity = 0.0035; /* prueba entre 0.002 - 0.01 */
+
+    /* sólo nos interesa el delta X para girar la vista */
+    dx = (double)(x - center_x);
+
+    /* ángulo de rotación (positivo -> girar a la derecha; negativo -> izquierda).
+       invertimos signo si prefieres el movimiento natural contrario */
+    rot_angle = dx * sensitivity;
+
+    /* rotación de la dirección y del plano (mismo método que en update_player) */
+    old_dir_x = g->dirx;
+    g->dirx = g->dirx * cos(rot_angle) - g->diry * sin(rot_angle);
+    g->diry = old_dir_x * sin(rot_angle) + g->diry * cos(rot_angle);
+    old_plane_x = g->planex;
+    g->planex = g->planex * cos(rot_angle) - g->planey * sin(rot_angle);
+    g->planey = old_plane_x * sin(rot_angle) + g->planey * cos(rot_angle);
+
+    /* reposiciona el cursor de nuevo al centro para seguir recibiendo deltas */
+    /* mlx_mouse_move existe en la minilibx Linux; si tu versión no la tiene, comenta esta línea */
+    mlx_mouse_move(g->mlx, g->window, center_x, center_y);
+
+    return (0);
+}
+
+void	show_mouse(t_game *g)
+{
+	if (!g)
+		return ;
+	if (g->mouse_hidden)
+	{
+		if (!g || !g->mlx || !g->window)
+			return ;
+		mlx_mouse_show(g->mlx, g->window);
+		g->mouse_hidden = 0;
+	}
+	else
+	{
+		if (!g || !g->mlx || !g->window)
+			return ;
+		mlx_mouse_hide(g->mlx, g->window);
+		g->mouse_hidden = 1;		
+	}
+}
+
 //---------------------------------------------------------------------------------
+
+void	init_struct_g(t_game *g)
+{
+	g->no = NULL;
+	g->so = NULL;
+	g->we = NULL;
+	g->ea = NULL;
+	g->has_no = 0;
+	g->has_so = 0;
+	g->has_we = 0;
+	g->has_ea = 0;
+	g->has_floor = 0;
+	g->has_ceiling = 0;
+	g->mouse_hidden = 0;
+	g->screen_w = 2500;
+	g->screen_h = 1700;
+	g->frame_img = NULL;
+	g->frame_addr = NULL;
+	g->mlx = mlx_init();
+}
 
 int	main(int argc, char **argv)
 {
@@ -1020,26 +1109,18 @@ int	main(int argc, char **argv)
 	char	orient;
 
 	if (argc != 2)
-		return (write(2, "Error\nUsage: ./cub3D <file.cub>\n", 33), 1);
+		return (write(2, "Error\nArguments\n", 16), 1);
 	if (!is_cub(argv[1]))
-		return (write(2, "Error\nextension\n", 16), 1);
+		return (write(2, "Error\nExtension\n", 16), 1);
 	fd = open(argv[1], O_RDONLY);
 	if (fd < 0)
-		return (perror("Error\nopen"), 1);
-
+		return (perror("Error\nOpen"), 1);
 	/* inicializar campos de configuración */
-	g.no = NULL;
-	g.so = NULL;
-	g.we = NULL;
-	g.ea = NULL;
-	g.has_no = 0;
-	g.has_so = 0;
-	g.has_we = 0;
-	g.has_ea = 0;
-	g.has_floor = 0;
-	g.has_ceiling = 0;
+	init_struct_g(&g);
+	if (!g.mlx)
+		return (write(2, "Error\nmlx_init failed\n", 22),
+			free_map(&g), free_config(&g), 1);
 	first_map_line = NULL;
-
 	if (parse_headers(fd, &g, &first_map_line) < 0
 		|| parse_map(fd, first_map_line, &g) < 0)
 		return (close(fd), free_config(&g),
@@ -1048,48 +1129,45 @@ int	main(int argc, char **argv)
 		return (close(fd), free_map(&g), free_config(&g),
 			write(2, "Error\nMalloc\n", 13), 1);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
-		return (free_map(&g), free_config(&g), 1);
+		return (write(2, "Error\nInvalid map\n", 18),
+			free_map(&g), free_config(&g), 1);
 	if (find_player(&g, &py, &px, &orient) < 0)
 		return (write(2, "Error\nPlayer not found\n", 23),
 			free_map(&g), free_config(&g), 1);
 	close(fd);
-
-	/* init mlx y ventana */
-	g.mlx = mlx_init();
-	if (!g.mlx)
-		return (write(2, "Error\nmlx_init failed\n", 22),
-			free_map(&g), free_config(&g), 1);
-
-	/* tamaño de ventana (puedes ajustar) */
-	g.screen_w = 2500;
-	g.screen_h = 1700;
 	g.window = mlx_new_window(g.mlx, g.screen_w, g.screen_h, "cub3D");
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
 			free_map(&g), free_config(&g), 1);
+
+	/* centrar el ratón en la ventana para empezar */
+	mlx_mouse_move(g.mlx, g.window, g.screen_w / 2, g.screen_h / 2);
+
+	/*ocultar raton en la ventana*/
+	mlx_mouse_hide(g.mlx, g.window);
+
+	/* registrar movimiento del ratón */
+	mlx_hook(g.window, 6, 1L << 6, mouse_move, &g);
 
 	/* cargar texturas */
 	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
 		|| load_texture(g.mlx, &g.texture_so, g.so) < 0
 		|| load_texture(g.mlx, &g.texture_we, g.we) < 0
 		|| load_texture(g.mlx, &g.texture_ea, g.ea) < 0)
-		return(write(2, "Error\nTexture load failed\n", 26),
+		return (write(2, "Error\nTexture load failed\n", 26),
 			free_map(&g), free_config(&g), 1);
 
 	/* inicializar jugador/cámara con la posición encontrada */
 	init_player(&g, py, px, orient);
-
-	/* preparar frame buffer */
-	g.frame_img = NULL;
-	g.frame_addr = NULL;
+	
 	if (create_frame(&g) < 0)
 		return (write(2, "Error\nMalloc frame\n", 19),
 			free_map(&g), free_config(&g), 1);
 
 	/* registrar hooks */
-	mlx_hook(g.window, 2, 1L << 0, key_press, &g);    /* KeyPress */
-	mlx_hook(g.window, 3, 1L << 1, key_release, &g);  /* KeyRelease */
-	mlx_hook(g.window, 17, 0, handle_close, &g);      /* Window close (X) */
+	mlx_hook(g.window, 2, 1L << 0, key_press, &g);	/* KeyPress */
+	mlx_hook(g.window, 3, 1L << 1, key_release, &g);	/* KeyRelease */
+	mlx_hook(g.window, 17, 0, handle_close, &g);	/* Window close (X) */
 	mlx_loop_hook(g.mlx, game_loop, &g);
 
 	/* arrancar loop */

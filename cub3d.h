@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/18 15:04:31 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/18 17:55:21 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct s_game
 	int		has_ceiling;
 	int		map_height;
 	int		map_width;
+	int		mouse_hidden;
 	char	**map;
 	void		*mlx;
 	void		*window;
@@ -99,6 +100,7 @@ void	init_player(t_game *g, int py, int px, char orient);
 void	update_player(t_game *g, double delta);
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color);
 void	render_frame(t_game *g);
+void	show_mouse(t_game *g);
 
 int		is_cub(const char *fname);
 int		check_char(char c, int flag_walkable);
@@ -123,11 +125,11 @@ int		create_frame(t_game *g);
 int		key_release(int keycode, void *param);
 int		game_loop(void *param);
 
-t_texture	*choose_wall_texture(t_game *g, int side, double rayDirX, double rayDirY);
-
 char	**copy_map(t_game *g);
 char	*read_rest_of_file(int fd);
 
 double	get_time_s(void);
+
+t_texture	*choose_wall_texture(t_game *g, int side, double ray_dir_x, double ray_dir_y);
 
 #endif
