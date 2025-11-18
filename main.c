@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/18 17:57:19 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/18 18:05:22 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1011,50 +1011,45 @@ int	game_loop(void *param)
 }
 
 /* handler para movimiento del ratón (MotionNotify) */
-int mouse_move(int x, int y, void *param)
+int	mouse_move(int x, int y, void *param)
 {
-    t_game *g;
-    int center_x;
-    int center_y;
-    double dx;
-    double rot_angle;
-    double old_dir_x;
-    double old_plane_x;
+	t_game *g;
+	int center_x;
+	int center_y;
+	double dx;
+	double rot_angle;
+	double old_dir_x;
+	double old_plane_x;
 
-    g = (t_game *)param;
-    if (!g)
-        return (0);
+	g = (t_game *)param;
+	if (!g)
+		return (0);
 
-    center_x = g->screen_w / 2;
-    center_y = g->screen_h / 2;
+	center_x = g->screen_w / 2;
+	center_y = g->screen_h / 2;
 
-    /* si el cursor ya está en el centro, no hacemos nada (evita bucle al hacer mlx_mouse_move) */
-    if (x == center_x && y == center_y)
-        return (0);
+	/* si el cursor ya está en el centro, no hacemos nada (evita bucle al hacer mlx_mouse_move) */
+	if (x == center_x && y == center_y)
+		return (0);
 
-    /* sensibilidad: ajusta este valor a tu gusto (radianes por pixel) */
-    const double sensitivity = 0.0035; /* prueba entre 0.002 - 0.01 */
+	/* sensibilidad: ajusta este valor a tu gusto (radianes por pixel) */
+	const double sensitivity = 0.0035; /* prueba entre 0.002 - 0.01 */
 
-    /* sólo nos interesa el delta X para girar la vista */
-    dx = (double)(x - center_x);
+	/* sólo nos interesa el delta X para girar la vista */
+	dx = (double)(x - center_x);
 
-    /* ángulo de rotación (positivo -> girar a la derecha; negativo -> izquierda).
-       invertimos signo si prefieres el movimiento natural contrario */
-    rot_angle = dx * sensitivity;
+	/* ángulo de rotación (positivo -> girar a la derecha; negativo -> izquierda).
+		invertimos signo si prefieres el movimiento natural contrario */
+	rot_angle = dx * sensitivity;
 
-    /* rotación de la dirección y del plano (mismo método que en update_player) */
-    old_dir_x = g->dirx;
-    g->dirx = g->dirx * cos(rot_angle) - g->diry * sin(rot_angle);
-    g->diry = old_dir_x * sin(rot_angle) + g->diry * cos(rot_angle);
-    old_plane_x = g->planex;
-    g->planex = g->planex * cos(rot_angle) - g->planey * sin(rot_angle);
-    g->planey = old_plane_x * sin(rot_angle) + g->planey * cos(rot_angle);
-
-    /* reposiciona el cursor de nuevo al centro para seguir recibiendo deltas */
-    /* mlx_mouse_move existe en la minilibx Linux; si tu versión no la tiene, comenta esta línea */
-    mlx_mouse_move(g->mlx, g->window, center_x, center_y);
-
-    return (0);
+	/* rotación de la dirección y del plano (mismo método que en update_player) */
+	old_dir_x = g->dirx;
+	g->dirx = g->dirx * cos(rot_angle) - g->diry * sin(rot_angle);
+	g->diry = old_dir_x * sin(rot_angle) + g->diry * cos(rot_angle);
+	old_plane_x = g->planex;
+	g->planex = g->planex * cos(rot_angle) - g->planey * sin(rot_angle);
+	g->planey = old_plane_x * sin(rot_angle) + g->planey * cos(rot_angle);
+	return (0);
 }
 
 void	show_mouse(t_game *g)
@@ -1139,9 +1134,6 @@ int	main(int argc, char **argv)
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
 			free_map(&g), free_config(&g), 1);
-
-	/* centrar el ratón en la ventana para empezar */
-	mlx_mouse_move(g.mlx, g.window, g.screen_w / 2, g.screen_h / 2);
 
 	/*ocultar raton en la ventana*/
 	mlx_mouse_hide(g.mlx, g.window);
