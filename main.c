@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/18 18:05:22 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/19 10:55:03 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	free_config(t_game *g)
 	g->has_ceiling = 0;
 }
 
-int	is_cub(const char *fname)
+int	extension_is_cub(const char *fname)
 {
 	int	len;
 
@@ -515,15 +515,14 @@ int	key_press(int keycode, void *param)
 	{
 		if (g->window)
 			mlx_destroy_window(g->mlx, g->window);
-		free_map(g);
-		free_config(g);
+		(free_map(g), free_config(g));
 		exit(0);
 	}
 	else if (keycode == 119 || keycode == 'w')
 		g->key_w = 1;
 	else if (keycode == 115 || keycode == 's')
 		g->key_s = 1;
-	else if (keycode == 97  || keycode == 'a')
+	else if (keycode == 97 || keycode == 'a')
 		g->key_a = 1;
 	else if (keycode == 100 || keycode == 'd')
 		g->key_d = 1;
@@ -572,26 +571,18 @@ int	get_tex_pixel(t_texture *texture, int x, int y)
 
 //---------------------------------------------------------------------------------
 
-
 /* pinta techo y suelo directamente en g->frame_addr (frame_img debe existir) */
 void	draw_background_to_frame(t_game *g)
 {
-	int	x;
-	int	y;
-	unsigned int	color_ceiling;
-	unsigned int	color_floor;
-	char	*data;
-	int	bpp;
-	int	line_len;
+	int				x;
+	int				y;
+	unsigned int	color_c;
+	unsigned int	color_f;
 
 	if (!g || !g->frame_img || !g->frame_addr)
-		return;
-	/* colores RGB -> 0xRRGGBB */
-	color_ceiling = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
-	color_floor   = (g->floor[0]   << 16) | (g->floor[1]   << 8) | g->floor[2];
-	data = g->frame_addr;
-	bpp = g->frame_bpp;
-	line_len = g->frame_line_len;
+		return ;
+	color_c = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
+	color_f = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
 	y = 0;
 	while (y < g->screen_h)
 	{
@@ -599,9 +590,11 @@ void	draw_background_to_frame(t_game *g)
 		while (x < g->screen_w)
 		{
 			if (y < g->screen_h / 2)
-				*(unsigned int *)(data + y * line_len + x * (bpp / 8)) = color_ceiling;
+				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
+						+ x * (g->frame_bpp / 8)) = color_c;
 			else
-				*(unsigned int *)(data + y * line_len + x * (bpp / 8)) = color_floor;
+				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
+						+ x * (g->frame_bpp / 8)) = color_f;
 			x++;
 		}
 		y++;
@@ -641,12 +634,6 @@ void	init_player(t_game *g, int py, int px, char orient)
 		g->planex = 0.0;
 		g->planey = -0.66;
 	}
-	g->key_w = 0;
-	g->key_s = 0;
-	g->key_a = 0;
-	g->key_d = 0;
-	g->key_left = 0;
-	g->key_right = 0;
 }
 
 /* crear / recrear imagen de frame */
@@ -1014,8 +1001,6 @@ int	game_loop(void *param)
 int	mouse_move(int x, int y, void *param)
 {
 	t_game *g;
-	int center_x;
-	int center_y;
 	double dx;
 	double rot_angle;
 	double old_dir_x;
@@ -1024,19 +1009,15 @@ int	mouse_move(int x, int y, void *param)
 	g = (t_game *)param;
 	if (!g)
 		return (0);
-
-	center_x = g->screen_w / 2;
-	center_y = g->screen_h / 2;
-
 	/* si el cursor ya está en el centro, no hacemos nada (evita bucle al hacer mlx_mouse_move) */
-	if (x == center_x && y == center_y)
+	if (x == g->screen_w / 2 && y == g->screen_h)
 		return (0);
 
 	/* sensibilidad: ajusta este valor a tu gusto (radianes por pixel) */
 	const double sensitivity = 0.0035; /* prueba entre 0.002 - 0.01 */
 
 	/* sólo nos interesa el delta X para girar la vista */
-	dx = (double)(x - center_x);
+	dx = (double)(x - g->screen_w / 2);
 
 	/* ángulo de rotación (positivo -> girar a la derecha; negativo -> izquierda).
 		invertimos signo si prefieres el movimiento natural contrario */
@@ -1092,6 +1073,12 @@ void	init_struct_g(t_game *g)
 	g->frame_img = NULL;
 	g->frame_addr = NULL;
 	g->mlx = mlx_init();
+	g->key_w = 0;
+	g->key_s = 0;
+	g->key_a = 0;
+	g->key_d = 0;
+	g->key_left = 0;
+	g->key_right = 0;
 }
 
 int	main(int argc, char **argv)
@@ -1105,7 +1092,7 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 		return (write(2, "Error\nArguments\n", 16), 1);
-	if (!is_cub(argv[1]))
+	if (!extension_is_cub(argv[1]))
 		return (write(2, "Error\nExtension\n", 16), 1);
 	fd = open(argv[1], O_RDONLY);
 	if (fd < 0)

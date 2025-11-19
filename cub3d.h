@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/18 17:55:21 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/19 10:50:00 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ void	put_pixel_frame(t_game *g, int x, int y, unsigned int color);
 void	render_frame(t_game *g);
 void	show_mouse(t_game *g);
 
-int		is_cub(const char *fname);
+int		extension_is_cub(const char *fname);
 int		check_char(char c, int flag_walkable);
 int		flood_fill(t_game *g, char **visited, int y, int x);
 int		check_map_closed(t_game *g);
