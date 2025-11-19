@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/19 10:55:03 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/19 16:42:58 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1012,16 +1012,11 @@ int	mouse_move(int x, int y, void *param)
 	/* si el cursor ya está en el centro, no hacemos nada (evita bucle al hacer mlx_mouse_move) */
 	if (x == g->screen_w / 2 && y == g->screen_h)
 		return (0);
-
-	/* sensibilidad: ajusta este valor a tu gusto (radianes por pixel) */
-	const double sensitivity = 0.0035; /* prueba entre 0.002 - 0.01 */
-
 	/* sólo nos interesa el delta X para girar la vista */
 	dx = (double)(x - g->screen_w / 2);
-
 	/* ángulo de rotación (positivo -> girar a la derecha; negativo -> izquierda).
 		invertimos signo si prefieres el movimiento natural contrario */
-	rot_angle = dx * sensitivity;
+	rot_angle = dx * 0.0035;
 
 	/* rotación de la dirección y del plano (mismo método que en update_player) */
 	old_dir_x = g->dirx;
@@ -1111,8 +1106,7 @@ int	main(int argc, char **argv)
 		return (close(fd), free_map(&g), free_config(&g),
 			write(2, "Error\nMalloc\n", 13), 1);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
-		return (write(2, "Error\nInvalid map\n", 18),
-			free_map(&g), free_config(&g), 1);
+		return (free_map(&g), free_config(&g), 1);
 	if (find_player(&g, &py, &px, &orient) < 0)
 		return (write(2, "Error\nPlayer not found\n", 23),
 			free_map(&g), free_config(&g), 1);

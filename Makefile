@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: victor <victor@student.42.fr>              +#+  +:+       +#+         #
+#    By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/26 13:49:21 by vdiez-cu          #+#    #+#              #
-#    Updated: 2025/11/16 16:03:44 by victor           ###   ########.fr        #
+#    Updated: 2025/11/19 17:08:03 by sofernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,6 @@ NAME		= cub3D
 
 SRCS		= main.c
 			
-
 LIBFT = libft
 LIBFT_DIR = libft/
 LIBFT_LIB = $(LIBFT_DIR)libft.a
@@ -32,7 +31,6 @@ CFLAGS	= -Wall -Werror -Wextra
 all: $(LIBFT_LIB) $(MLX_LIB) $(NAME)
 
 $(LIBFT_LIB):
-	@echo "\033[1;33mCompiling libft...\033[0m"
 	@$(MAKE) -C $(LIBFT_DIR)
 
 $(NAME): $(OBJS) $(LIBFT_LIB)
