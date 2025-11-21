@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/19 10:50:00 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/21 13:40:27 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ typedef struct s_game
 	int		has_ceiling;
 	int		map_height;
 	int		map_width;
-	int		mouse_hidden;
 	char	**map;
 	void		*mlx;
 	void		*window;
@@ -100,7 +99,6 @@ void	init_player(t_game *g, int py, int px, char orient);
 void	update_player(t_game *g, double delta);
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color);
 void	render_frame(t_game *g);
-void	show_mouse(t_game *g);
 
 int		extension_is_cub(const char *fname);
 int		check_char(char c, int flag_walkable);

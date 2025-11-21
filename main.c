@@ -3,19 +3,69 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/19 16:42:58 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/21 14:04:57 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
+void	drain_gnl_fd(int fd)
+{
+	char	*tmp;
+
+	if (fd < 0)
+		return ;
+	tmp = get_next_line(fd);
+	while (tmp)
+	{
+		free(tmp);
+		tmp = get_next_line(fd);
+	}
+}
+
 void	free_config(t_game *g)
 {
 	if (!g)
 		return ;
+	if (g->mlx)
+	{
+		if (g->texture_no.imagen)
+		{
+			mlx_destroy_image(g->mlx, g->texture_no.imagen);
+			g->texture_no.imagen = NULL;
+			g->texture_no.addr = NULL;
+		}
+		if (g->texture_so.imagen)
+		{
+			mlx_destroy_image(g->mlx, g->texture_so.imagen);
+			g->texture_so.imagen = NULL;
+			g->texture_so.addr = NULL;
+		}
+		if (g->texture_we.imagen)
+		{
+			mlx_destroy_image(g->mlx, g->texture_we.imagen);
+			g->texture_we.imagen = NULL;
+			g->texture_we.addr = NULL;
+		}
+		if (g->texture_ea.imagen)
+		{
+			mlx_destroy_image(g->mlx, g->texture_ea.imagen);
+			g->texture_ea.imagen = NULL;
+			g->texture_ea.addr = NULL;
+		}
+		if (g->frame_img)
+		{
+			mlx_destroy_image(g->mlx, g->frame_img);
+			g->frame_img = NULL;
+			g->frame_addr = NULL;
+		}
+		if (g->window)
+			(mlx_destroy_window(g->mlx, g->window), g->window = NULL);
+		(mlx_destroy_display(g->mlx), free(g->mlx), g->mlx = NULL);
+	}
 	if (g->no)
 		(free(g->no), g->no = NULL);
 	if (g->so)
@@ -138,8 +188,7 @@ int	check_map_closed(t_game *g)
 		}
 		y++;
 	}
-	free_copy(copy);
-	return (write(2, "Error\nNo walkable area found\n", 29), -1);
+	return (free_copy(copy), write(2, "Error\nNo walkable area\n", 23), -1);
 }
 
 int	validate_map_chars(t_game *g)
@@ -198,7 +247,6 @@ int	parse_map(int fd, char *first_line, t_game *g)
 {
 	char	*rest;
 	char	*big_map;
-	char	*tmp;
 	int		len;
 
 	if (!first_line || !g)
@@ -206,18 +254,14 @@ int	parse_map(int fd, char *first_line, t_game *g)
 	rest = read_rest_of_file(fd);
 	if (!rest)
 		return (free(first_line), -1);
-	tmp = ft_strjoin(first_line, rest);
-	free(first_line);
-	free(rest);
-	if (!tmp)
+	big_map = ft_strjoin(first_line, rest);
+	(free(first_line), free(rest));
+	if (!big_map)
 		return (-1);
-	big_map = tmp;
 	g->map = ft_split(big_map, '\n');
 	free(big_map);
 	if (!g->map)
 		return (-1);
-	g->map_height = 0;
-	g->map_width = 0;
 	while (g->map[g->map_height])
 	{
 		len = ft_strlen(g->map[g->map_height]);
@@ -420,24 +464,21 @@ int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 	{
 		if (is_blank_line(line))
 		{
-			free(line);
-			line = get_next_line(fd);
+			(free(line), line = get_next_line(fd));
 			continue ;
 		}
 		if (is_header_line(line))
 		{
 			if (parse_one_header(line, g) < 0)
-				return (free(line), free_config(g), -1);
-			free(line);
-			line = get_next_line(fd);
+				return (free(line), drain_gnl_fd(fd), free_config(g), -1);
+			(free(line), line = get_next_line(fd));
 			continue ;
 		}
-		*out_first_map_line = line;
-		return (0);
+		return (*out_first_map_line = line, 0);
 	}
 	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_floor
 		|| !g->has_ceiling)
-		return (free_config(g), -1);
+		return (drain_gnl_fd(fd), free_config(g), -1);
 	return (0);
 }
 
@@ -512,12 +553,7 @@ int	key_press(int keycode, void *param)
 
 	g = (t_game *)param;
 	if (keycode == 65307)
-	{
-		if (g->window)
-			mlx_destroy_window(g->mlx, g->window);
-		(free_map(g), free_config(g));
-		exit(0);
-	}
+	    return (handle_close(g));
 	else if (keycode == 119 || keycode == 'w')
 		g->key_w = 1;
 	else if (keycode == 115 || keycode == 's')
@@ -530,8 +566,6 @@ int	key_press(int keycode, void *param)
 		g->key_left = 1;
 	else if (keycode == 65363)
 		g->key_right = 1;
-	else if (keycode == 120 || keycode == 'x')
-		show_mouse(g);
 	return (0);
 }
 
@@ -1009,8 +1043,7 @@ int	mouse_move(int x, int y, void *param)
 	g = (t_game *)param;
 	if (!g)
 		return (0);
-	/* si el cursor ya está en el centro, no hacemos nada (evita bucle al hacer mlx_mouse_move) */
-	if (x == g->screen_w / 2 && y == g->screen_h)
+	if (x == g->screen_w / 2 && y == g->screen_h / 2)
 		return (0);
 	/* sólo nos interesa el delta X para girar la vista */
 	dx = (double)(x - g->screen_w / 2);
@@ -1028,52 +1061,16 @@ int	mouse_move(int x, int y, void *param)
 	return (0);
 }
 
-void	show_mouse(t_game *g)
-{
-	if (!g)
-		return ;
-	if (g->mouse_hidden)
-	{
-		if (!g || !g->mlx || !g->window)
-			return ;
-		mlx_mouse_show(g->mlx, g->window);
-		g->mouse_hidden = 0;
-	}
-	else
-	{
-		if (!g || !g->mlx || !g->window)
-			return ;
-		mlx_mouse_hide(g->mlx, g->window);
-		g->mouse_hidden = 1;		
-	}
-}
-
 //---------------------------------------------------------------------------------
 
 void	init_struct_g(t_game *g)
 {
-	g->no = NULL;
-	g->so = NULL;
-	g->we = NULL;
-	g->ea = NULL;
-	g->has_no = 0;
-	g->has_so = 0;
-	g->has_we = 0;
-	g->has_ea = 0;
-	g->has_floor = 0;
-	g->has_ceiling = 0;
-	g->mouse_hidden = 0;
+	if (!g)
+		return ;
+	ft_memset(g, 0, sizeof(*g));
 	g->screen_w = 2500;
 	g->screen_h = 1700;
-	g->frame_img = NULL;
-	g->frame_addr = NULL;
 	g->mlx = mlx_init();
-	g->key_w = 0;
-	g->key_s = 0;
-	g->key_a = 0;
-	g->key_d = 0;
-	g->key_left = 0;
-	g->key_right = 0;
 }
 
 int	main(int argc, char **argv)
@@ -1098,10 +1095,21 @@ int	main(int argc, char **argv)
 		return (write(2, "Error\nmlx_init failed\n", 22),
 			free_map(&g), free_config(&g), 1);
 	first_map_line = NULL;
-	if (parse_headers(fd, &g, &first_map_line) < 0
-		|| parse_map(fd, first_map_line, &g) < 0)
-		return (close(fd), free_config(&g),
-			write(2, "Error\nInvalid map\n", 18), 1);
+	if (parse_headers(fd, &g, &first_map_line) < 0)
+	{
+		drain_gnl_fd(fd);
+		close(fd);
+		free_config(&g);
+		return (write(2, "Error\nInvalid map\n", 18), 1);
+	}
+	if (parse_map(fd, first_map_line, &g) < 0)
+	{
+		if (first_map_line)
+			free(first_map_line);
+		close(fd);
+		free_config(&g);
+		return (write(2, "Error\nInvalid map\n", 18), 1);
+	}
 	if (pad_map(&g) < 0)
 		return (close(fd), free_map(&g), free_config(&g),
 			write(2, "Error\nMalloc\n", 13), 1);
@@ -1115,13 +1123,8 @@ int	main(int argc, char **argv)
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
 			free_map(&g), free_config(&g), 1);
-
-	/*ocultar raton en la ventana*/
-	mlx_mouse_hide(g.mlx, g.window);
-
 	/* registrar movimiento del ratón */
-	mlx_hook(g.window, 6, 1L << 6, mouse_move, &g);
-
+	mlx_hook(g.window, 6, 64, mouse_move, &g);
 	/* cargar texturas */
 	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
 		|| load_texture(g.mlx, &g.texture_so, g.so) < 0
@@ -1129,23 +1132,18 @@ int	main(int argc, char **argv)
 		|| load_texture(g.mlx, &g.texture_ea, g.ea) < 0)
 		return (write(2, "Error\nTexture load failed\n", 26),
 			free_map(&g), free_config(&g), 1);
-
 	/* inicializar jugador/cámara con la posición encontrada */
 	init_player(&g, py, px, orient);
-	
 	if (create_frame(&g) < 0)
 		return (write(2, "Error\nMalloc frame\n", 19),
 			free_map(&g), free_config(&g), 1);
-
 	/* registrar hooks */
-	mlx_hook(g.window, 2, 1L << 0, key_press, &g);	/* KeyPress */
-	mlx_hook(g.window, 3, 1L << 1, key_release, &g);	/* KeyRelease */
+	mlx_hook(g.window, 2, 1, key_press, &g);	/* KeyPress */
+	mlx_hook(g.window, 3, 2, key_release, &g);	/* KeyRelease */
 	mlx_hook(g.window, 17, 0, handle_close, &g);	/* Window close (X) */
 	mlx_loop_hook(g.mlx, game_loop, &g);
-
 	/* arrancar loop */
 	mlx_loop(g.mlx);
-
 	/* limpieza (normalmente no llegas aquí porque handle_close llama exit) */
 	return (free_map(&g), free_config(&g), 0);
 }
