@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/21 14:04:57 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/25 18:04:57 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ char	*read_rest_of_file(int fd)
 	return (all);
 }
 
-int	parse_map(int fd, char *first_line, t_game *g)
+/*int	parse_map(int fd, char *first_line, t_game *g)
 {
 	char	*rest;
 	char	*big_map;
@@ -269,6 +269,87 @@ int	parse_map(int fd, char *first_line, t_game *g)
 			g->map_width = len;
 		g->map_height++;
 	}
+	return (0);
+}*/
+
+int parse_map(int fd, char *first_line, t_game *g)
+{
+	char	*line;
+	char	*big_map;
+	char	*rest;
+	int		idx;
+
+	if (!first_line || !g)
+		return (-1);
+	rest = read_rest_of_file(fd);
+	if (!rest)
+		return (free(first_line), -1);
+	big_map = ft_strjoin(first_line, rest);
+	free(first_line);
+	free(rest);
+	if (!big_map)
+		return (-1);
+	g->map_height = 0;
+	idx = 0;
+	while (big_map[idx])
+		if (big_map[idx++] == '\n')
+			g->map_height++;
+	if (big_map[idx - 1] != '\n') // si no termina en \n
+		g->map_height++;
+	g->map = malloc(sizeof(char *) * (g->map_height + 1));
+	if (!g->map)
+		return (free(big_map), -1);
+	idx = 0;
+	line = big_map;
+	int line_start = 0;
+	int y = 0;
+	while (line[idx])
+	{
+		if (line[idx] == '\n')
+		{
+			int len = idx - line_start;
+			g->map[y] = malloc(len + 1);
+			if (!g->map[y])
+			{
+				while (--y >= 0)
+					free(g->map[y]);
+				free(g->map);
+				free(big_map);
+				return (-1);
+			}
+			if (len)
+				memcpy(g->map[y], line + line_start, len);
+			g->map[y][len] = '\0';
+			line_start = idx + 1;
+			y++;
+		}
+		idx++;
+	}
+	if (line_start < idx)
+	{
+		int len = idx - line_start;
+		g->map[y] = malloc(len + 1);
+		if (!g->map[y])
+		{
+			while (--y >= 0)
+				free(g->map[y]);
+			free(g->map);
+			free(big_map);
+			return (-1);
+		}
+		memcpy(g->map[y], line + line_start, len);
+		g->map[y][len] = '\0';
+		y++;
+	}
+	g->map[y] = NULL;
+	g->map_width = 0;
+	for (y = 0; g->map[y]; y++)
+	{
+		int len = ft_strlen(g->map[y]);
+		if (len > g->map_width)
+			g->map_width = len;
+	}
+	free(big_map);
 	return (0);
 }
 
@@ -299,6 +380,29 @@ int	is_blank_line(const char *s)
 		s++;
 	}
 	return (1);
+}
+
+int	check_empty_lines_in_map(t_game *g)
+{
+	int	y;
+	int	in_map;
+
+	if (!g || !g->map)
+		return (-1);
+	in_map = 0;
+	y = 0;
+	while (y < g->map_height)
+	{
+		if (!is_blank_line(g->map[y])) // línea con contenido real
+			in_map = 1;
+		else if (in_map) // línea vacía dentro del mapa
+		{
+			write(2, "Error\nEmpty line in map\n", 25);
+			return (-1);
+		}
+		y++;
+	}
+	return (0);
 }
 
 //---------------------------------------------------------
@@ -770,21 +874,26 @@ void	update_player(t_game *g, double delta)
 	}
 	if (g->key_left)
 	{
-		old_dir_x = g->dirx;
-		g->dirx = g->dirx * cos(rot_speed) - g->diry * sin(rot_speed);
-		g->diry = old_dir_x * sin(rot_speed) + g->diry * cos(rot_speed);
-		old_plane_x = g->planex;
-		g->planex = g->planex * cos(rot_speed) - g->planey * sin(rot_speed);
-		g->planey = old_plane_x * sin(rot_speed) + g->planey * cos(rot_speed);
-	}
-	if (g->key_right)
-	{
+		// Giro hacia la izquierda = rotación negativa
 		old_dir_x = g->dirx;
 		g->dirx = g->dirx * cos(-rot_speed) - g->diry * sin(-rot_speed);
 		g->diry = old_dir_x * sin(-rot_speed) + g->diry * cos(-rot_speed);
+
 		old_plane_x = g->planex;
 		g->planex = g->planex * cos(-rot_speed) - g->planey * sin(-rot_speed);
 		g->planey = old_plane_x * sin(-rot_speed) + g->planey * cos(-rot_speed);
+	}
+
+	if (g->key_right)
+	{
+		// Giro hacia la derecha = rotación positiva
+		old_dir_x = g->dirx;
+		g->dirx = g->dirx * cos(rot_speed) - g->diry * sin(rot_speed);
+		g->diry = old_dir_x * sin(rot_speed) + g->diry * cos(rot_speed);
+
+		old_plane_x = g->planex;
+		g->planex = g->planex * cos(rot_speed) - g->planey * sin(rot_speed);
+		g->planey = old_plane_x * sin(rot_speed) + g->planey * cos(rot_speed);
 	}
 }
 
@@ -1089,7 +1198,7 @@ int	main(int argc, char **argv)
 	fd = open(argv[1], O_RDONLY);
 	if (fd < 0)
 		return (perror("Error\nOpen"), 1);
-	/* inicializar campos de configuración */
+	// inicializar campos de configuración
 	init_struct_g(&g);
 	if (!g.mlx)
 		return (write(2, "Error\nmlx_init failed\n", 22),
@@ -1102,6 +1211,7 @@ int	main(int argc, char **argv)
 		free_config(&g);
 		return (write(2, "Error\nInvalid map\n", 18), 1);
 	}
+	
 	if (parse_map(fd, first_map_line, &g) < 0)
 	{
 		if (first_map_line)
@@ -1110,6 +1220,14 @@ int	main(int argc, char **argv)
 		free_config(&g);
 		return (write(2, "Error\nInvalid map\n", 18), 1);
 	}
+
+	if (check_empty_lines_in_map(&g) < 0)
+	{
+		free_map(&g);
+		free_config(&g);
+		return (1);
+	}
+
 	if (pad_map(&g) < 0)
 		return (close(fd), free_map(&g), free_config(&g),
 			write(2, "Error\nMalloc\n", 13), 1);
@@ -1123,27 +1241,27 @@ int	main(int argc, char **argv)
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
 			free_map(&g), free_config(&g), 1);
-	/* registrar movimiento del ratón */
+	// registrar movimiento del ratón 
 	mlx_hook(g.window, 6, 64, mouse_move, &g);
-	/* cargar texturas */
+	// cargar texturas
 	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
 		|| load_texture(g.mlx, &g.texture_so, g.so) < 0
 		|| load_texture(g.mlx, &g.texture_we, g.we) < 0
 		|| load_texture(g.mlx, &g.texture_ea, g.ea) < 0)
 		return (write(2, "Error\nTexture load failed\n", 26),
 			free_map(&g), free_config(&g), 1);
-	/* inicializar jugador/cámara con la posición encontrada */
+	// inicializar jugador/cámara con la posición encontrada 
 	init_player(&g, py, px, orient);
 	if (create_frame(&g) < 0)
 		return (write(2, "Error\nMalloc frame\n", 19),
 			free_map(&g), free_config(&g), 1);
-	/* registrar hooks */
-	mlx_hook(g.window, 2, 1, key_press, &g);	/* KeyPress */
-	mlx_hook(g.window, 3, 2, key_release, &g);	/* KeyRelease */
-	mlx_hook(g.window, 17, 0, handle_close, &g);	/* Window close (X) */
+	// registrar hooks
+	mlx_hook(g.window, 2, 1, key_press, &g);	// KeyPress 
+	mlx_hook(g.window, 3, 2, key_release, &g);	// KeyRelease 
+	mlx_hook(g.window, 17, 0, handle_close, &g);	// Window close (X)
 	mlx_loop_hook(g.mlx, game_loop, &g);
-	/* arrancar loop */
+	// arrancar loop
 	mlx_loop(g.mlx);
-	/* limpieza (normalmente no llegas aquí porque handle_close llama exit) */
+	// limpieza (normalmente no llegas aquí porque handle_close llama exit)
 	return (free_map(&g), free_config(&g), 0);
 }
