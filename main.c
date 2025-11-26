@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/25 18:04:57 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/26 17:27:03 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ int	check_map_closed(t_game *g)
 		}
 		y++;
 	}
-	return (free_copy(copy), write(2, "Error\nNo walkable area\n", 23), -1);
+	return (free_copy(copy), write(2, "Error\nInvalid map\n", 18), -1);
 }
 
 int	validate_map_chars(t_game *g)
@@ -556,34 +556,124 @@ int	parse_one_header(const char *line, t_game *g)
 	return (free(trim), -1);
 }
 
-int	parse_headers(int fd, t_game *g, char **out_first_map_line)
+int	parse_one_header_ordered(const char *line, t_game *g, int *order)
 {
-	char	*line;
+	char	*trim;
+	int		idx = -1;
 
-	if (!g || !out_first_map_line)
+	trim = ft_strtrim(line, " \t\n\r");
+	if (!trim)
 		return (-1);
-	*out_first_map_line = NULL;
-	line = get_next_line(fd);
-	while (line != NULL)
+	if (ft_strncmp(trim, "NO", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+		idx = 0;
+	else if (ft_strncmp(trim, "SO", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+		idx = 1;
+	else if (ft_strncmp(trim, "WE", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+		idx = 2;
+	else if (ft_strncmp(trim, "EA", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+		idx = 3;
+	else if (trim[0] == 'F' && (trim[1] == ' ' || trim[1] == '\t'))
+		idx = 4;
+	else if (trim[0] == 'C' && (trim[1] == ' ' || trim[1] == '\t'))
+		idx = 5;
+	if (idx == -1)
+		return (free(trim), -1);
+	// Verificar que el orden sea correcto
+	for (int i = 0; i < idx; i++)
 	{
-		if (is_blank_line(line))
+		if (!order[i])
 		{
-			(free(line), line = get_next_line(fd));
-			continue ;
+			// error: se encontró idx antes de un elemento anterior
+			free(trim);
+			return (-1);
 		}
-		if (is_header_line(line))
-		{
-			if (parse_one_header(line, g) < 0)
-				return (free(line), drain_gnl_fd(fd), free_config(g), -1);
-			(free(line), line = get_next_line(fd));
-			continue ;
-		}
-		return (*out_first_map_line = line, 0);
 	}
-	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_floor
-		|| !g->has_ceiling)
-		return (drain_gnl_fd(fd), free_config(g), -1);
+	// Procesar realmente la línea
+	if (idx == 0)
+	{
+		if (g->has_no || set_texture(&g->no, trim + 2) < 0)
+		return (free(trim), -1);
+		g->has_no = 1;
+	}
+	else if (idx == 1)
+	{
+		if (g->has_so || set_texture(&g->so, trim + 2) < 0)
+		return (free(trim), -1);
+		g->has_so = 1;
+	}
+	else if (idx == 2)
+	{
+		if (g->has_we || set_texture(&g->we, trim + 2) < 0)
+		return (free(trim), -1);
+		g->has_we = 1;
+	}
+	else if (idx == 3)
+	{
+		if (g->has_ea || set_texture(&g->ea, trim + 2) < 0)
+		return (free(trim), -1);
+		g->has_ea = 1;
+	}
+	else if (idx == 4)
+	{
+		if (g->has_floor || parse_color_values(trim + 1, g->floor) < 0)
+		return (free(trim), -1);
+		g->has_floor = 1;
+	}
+	else if (idx == 5)
+	{
+		if (g->has_ceiling || parse_color_values(trim + 1, g->ceiling) < 0)
+		return (free(trim), -1);
+		g->has_ceiling = 1;
+	}
+	order[idx] = 1;
+	free(trim);
 	return (0);
+}
+
+int parse_headers(int fd, t_game *g, char **out_first_map_line)
+{
+    char    *line;
+    int     order[6] = {0};
+
+    if (!g || !out_first_map_line)
+        return (-1);
+    *out_first_map_line = NULL;
+    line = get_next_line(fd);
+    while (line != NULL)
+    {
+        if (is_blank_line(line))
+        {
+            free(line);
+            line = get_next_line(fd);
+            continue ;
+        }
+        if (is_header_line(line))
+        {
+            if (parse_one_header_ordered(line, g, order) < 0)
+                return (free(line), drain_gnl_fd(fd), free_config(g), -1);
+            free(line);
+            line = get_next_line(fd);
+            continue ;
+        }
+        /* Antes de aceptar esta línea como inicio del mapa
+           comprobamos que todas las cabeceras obligatorias ya se hayan leído. */
+        if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea
+            || !g->has_floor || !g->has_ceiling)
+        {
+            free(line);
+            drain_gnl_fd(fd);
+            free_config(g);
+            return (-1);
+        }
+        /* Si aquí, ya teníamos todas las cabeceras: devolvemos la línea como
+           primer renglón del mapa */
+        *out_first_map_line = line;
+        return (0);
+    }
+    if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_floor
+        || !g->has_ceiling)
+        return (drain_gnl_fd(fd), free_config(g), -1);
+    return (0);
 }
 
 int	pad_map(t_game *g)
@@ -1209,7 +1299,7 @@ int	main(int argc, char **argv)
 		drain_gnl_fd(fd);
 		close(fd);
 		free_config(&g);
-		return (write(2, "Error\nInvalid map\n", 18), 1);
+		return (write(2, "Error\nHeader\n", 13), 1);
 	}
 	
 	if (parse_map(fd, first_map_line, &g) < 0)
