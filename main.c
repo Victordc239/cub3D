@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/26 17:27:03 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/11/27 11:01:46 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1275,16 +1275,28 @@ void	init_struct_g(t_game *g)
 int	main(int argc, char **argv)
 {
 	int		fd;
+	int		fd_empty;
 	t_game	g;
 	char	*first_map_line;
 	int		py;
 	int		px;
 	char	orient;
+	char	tmp_empty_file[1];
+	int	empty_file;
 
 	if (argc != 2)
 		return (write(2, "Error\nArguments\n", 16), 1);
 	if (!extension_is_cub(argv[1]))
-		return (write(2, "Error\nExtension\n", 16), 1);
+		return (write(2, "Error\nExtension\n", 16), 1);	
+	fd_empty = open(argv[1], O_RDONLY);
+	if (fd_empty < 0)
+		return (perror("Error\nOpen"), 1);
+	empty_file = read(fd_empty, tmp_empty_file, 1);
+	if (empty_file < 0)
+		return (close(fd_empty), perror("Error\nRead"), 1);
+	if (empty_file == 0)
+		return (close(fd_empty), write(2, "Error\nEmpty file\n", 17), 1);
+	close(fd_empty);
 	fd = open(argv[1], O_RDONLY);
 	if (fd < 0)
 		return (perror("Error\nOpen"), 1);
@@ -1301,7 +1313,6 @@ int	main(int argc, char **argv)
 		free_config(&g);
 		return (write(2, "Error\nHeader\n", 13), 1);
 	}
-	
 	if (parse_map(fd, first_map_line, &g) < 0)
 	{
 		if (first_map_line)
