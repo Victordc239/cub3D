@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/27 13:35:27 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/27 14:00:08 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1244,13 +1244,9 @@ int	mouse_move(int x, int y, void *param)
 		return (0);
 	if (x == g->screen_w / 2 && y == g->screen_h / 2)
 		return (0);
-	/* sólo nos interesa el delta X para girar la vista */
 	dx = (double)(x - g->screen_w / 2);
-	/* ángulo de rotación (positivo -> girar a la derecha; negativo -> izquierda).
-		invertimos signo si prefieres el movimiento natural contrario */
 	rot_angle = dx * 0.0035;
 
-	/* rotación de la dirección y del plano (mismo método que en update_player) */
 	old_dir_x = g->dirx;
 	g->dirx = g->dirx * cos(rot_angle) - g->diry * sin(rot_angle);
 	g->diry = old_dir_x * sin(rot_angle) + g->diry * cos(rot_angle);
@@ -1259,6 +1255,7 @@ int	mouse_move(int x, int y, void *param)
 	g->planey = old_plane_x * sin(rot_angle) + g->planey * cos(rot_angle);
 	return (0);
 }
+
 
 //---------------------------------------------------------------------------------
 
@@ -1303,7 +1300,7 @@ int	main(int argc, char **argv)
 	// inicializar campos de configuración
 	init_struct_g(&g);
 	if (!g.mlx)
-		return (write(2, "Error\nmlx_init failed\n", 22),
+		return (close(fd), write(2, "Error\nmlx_init failed\n", 22),
 			free_map(&g), free_config(&g), 1);
 	first_map_line = NULL;
 	if (parse_headers(fd, &g, &first_map_line) < 0)
@@ -1321,21 +1318,20 @@ int	main(int argc, char **argv)
 		free_config(&g);
 		return (write(2, "Error\nInvalid map\n", 18), 1);
 	}
-
 	if (check_empty_lines_in_map(&g) < 0)
 	{
 		free_map(&g);
 		free_config(&g);
+		close(fd);
 		return (1);
 	}
-
 	if (pad_map(&g) < 0)
 		return (close(fd), free_map(&g), free_config(&g),
 			write(2, "Error\nMalloc\n", 13), 1);
 	if (validate_map_chars(&g) < 0 || check_map_closed(&g) < 0)
-		return (free_map(&g), free_config(&g), 1);
+		return (close(fd), free_map(&g), free_config(&g), 1);
 	if (find_player(&g, &py, &px, &orient) < 0)
-		return (write(2, "Error\nPlayer not found\n", 23),
+		return (close(fd), write(2, "Error\nPlayer not found\n", 23),
 			free_map(&g), free_config(&g), 1);
 	close(fd);
 	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
@@ -1350,8 +1346,6 @@ int	main(int argc, char **argv)
 			free_map(&g), free_config(&g), 1);
 	// registrar movimiento del ratón 
 	mlx_hook(g.window, 6, 64, mouse_move, &g);
-	// cargar texturas
-	
 	// inicializar jugador/cámara con la posición encontrada 
 	init_player(&g, py, px, orient);
 	if (create_frame(&g) < 0)
