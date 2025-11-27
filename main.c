@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/27 16:48:49 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/27 18:09:28 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,10 +160,10 @@ void	free_copy(char **copy)
 	free(copy);
 }
 
-int find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x)
+int	find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x)
 {
-	int y;
-	int x;
+	int	y;
+	int	x;
 
 	if (!copy || !out_y || !out_x)
 		return (-1);
@@ -193,7 +193,6 @@ int	check_map_closed(t_game *g)
 	int		py;
 	int		px;
 	char	**copy;
-	int		result;
 	int		y;
 	int		x;
 
@@ -202,19 +201,16 @@ int	check_map_closed(t_game *g)
 		return (-1);
 	if (find_player_in_copy(copy, g->map_height, &py, &px) < 0)
 		return (free_copy(copy), write(2, "Error\nPlayer not found\n", 23), -1);
-	result = flood_fill(g, copy, py, px);
-	if (result < 0)
+	if (flood_fill(g, copy, py, px) < 0)
 		return (free_copy(copy), write(2, "Error\nMap not closed\n", 21), -1);
 	y = 0;
 	while (copy[y])
 	{
-		x = 0;
-		while (copy[y][x])
-		{
+		x = -1;
+		while (copy[y][++x])
 			if (check_char(copy[y][x], 1))
-				return (free_copy(copy), write(2, "Error\nArea inaccessible\n", 24), -1);
-			x++;
-		}
+				return (free_copy(copy),
+					write(2, "Error\nArea inaccessible\n", 24), -1);
 		y++;
 	}
 	return (free_copy(copy), 0);
@@ -413,7 +409,7 @@ char	*read_rest_of_file(int fd)
 	return (0);
 }*/
 
-int parse_map(int fd, char *first_line, t_game *g)
+int	parse_map(int fd, char *first_line, t_game *g)
 {
 	char	*line;
 	char	*big_map;
@@ -450,7 +446,7 @@ int parse_map(int fd, char *first_line, t_game *g)
 	{
 		if (line[idx] == '\n')
 		{
-			int len = idx - line_start;
+			len = idx - line_start;
 			g->map[y] = malloc(len + 1);
 			if (!g->map[y])
 			{
@@ -494,7 +490,6 @@ int parse_map(int fd, char *first_line, t_game *g)
 	}
 	return (free(big_map), 0);
 }
-
 
 void	free_map(t_game *g)
 {
@@ -841,8 +836,15 @@ int	parse_one_header_ordered(const char *line, t_game *g, int *order)
 int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 {
 	char	*line;
-	int	order[6] = {0};
+	int		order[6];
+	int		i;
 
+	i = 0;
+	while (i < 6)
+	{
+		order[i] = 0;
+		i++;
+	}
 	if (!g || !out_first_map_line)
 		return (-1);
 	*out_first_map_line = NULL;
@@ -883,8 +885,8 @@ int	pad_map(t_game *g)
 
 	if (!g || !g->map)
 		return (-1);
-	y = 0;
-	while (y < g->map_height)
+	y = -1;
+	while (++y < g->map_height)
 	{
 		len = ft_strlen(g->map[y]);
 		if (len < g->map_width)
@@ -892,19 +894,14 @@ int	pad_map(t_game *g)
 			newrow = malloc(g->map_width + 1);
 			if (!newrow)
 				return (-1);
-			i = 0;
-			while (i < len)
-			{
+			i = -1;
+			while (++i < len)
 				newrow[i] = g->map[y][i];
-				i++;
-			}
 			while (i < g->map_width)
 				newrow[i++] = ' ';
 			newrow[i] = '\0';
-			free(g->map[y]);
-			g->map[y] = newrow;
+			(free(g->map[y]), g->map[y] = newrow);
 		}
-		y++;
 	}
 	return (0);
 }
@@ -945,7 +942,7 @@ int	key_press(int keycode, void *param)
 
 	g = (t_game *)param;
 	if (keycode == 65307)
-	    return (handle_close(g));
+		return (handle_close(g));
 	else if (keycode == 119 || keycode == 'w')
 		g->key_w = 1;
 	else if (keycode == 115 || keycode == 's')
@@ -994,8 +991,6 @@ int	get_tex_pixel(t_texture *texture, int x, int y)
 			* (texture->bit_by_pixel / 8));
 	return (*(unsigned int *)px);
 }
-
-//---------------------------------------------------------------------------------
 
 /* pinta techo y suelo directamente en g->frame_addr (frame_img debe existir) */
 void	draw_background_to_frame(t_game *g)
@@ -1093,7 +1088,7 @@ int	key_release(int keycode, void *param)
 		g->key_w = 0;
 	else if (keycode == 115 || keycode == 's')
 		g->key_s = 0;
-	else if (keycode == 97  || keycode == 'a')
+	else if (keycode == 97 || keycode == 'a')
 		g->key_a = 0;
 	else if (keycode == 100 || keycode == 'd')
 		g->key_d = 0;
@@ -1225,35 +1220,35 @@ t_texture	*choose_wall_texture(t_game *g, int side, double ray_dir_x, double ray
 void	render_frame(t_game *g)
 {
 	int	x;
-	double camera_x;
-	double ray_dir_x;
-	double ray_dir_y;
-	int map_x;
-	int map_y;
-	double side_dist_x;
-	double side_dist_y;
-	double delta_dist_x;
-	double delta_dist_y;
-	int step_x;
-	int step_y;
-	int hit;
-	int side;
-	char mch;
-	double perp_wall_dist;
-	int line_height;
-	int draw_start;
-	int draw_end;
-	double wall_x;
-	t_texture *tex;
-	int tex_width;
-	int tex_height;
-	int tex_x;
-	double step;
-	double tex_pos;
-	int y;
-	int tex_y;
-	unsigned int color;
-	
+	int	map_x;
+	int	map_y;
+	int	step_x;
+	int	step_y;
+	int	hit;
+	int	side;
+	int	line_height;
+	int	draw_start;
+	int	draw_end;
+	int	tex_width;
+	int	tex_height;
+	int	tex_x;
+	int	y;
+	int	tex_y;
+	double	camera_x;
+	double	ray_dir_x;
+	double	ray_dir_y;
+	double	side_dist_x;
+	double	side_dist_y;
+	double	delta_dist_x;
+	double	delta_dist_y;
+	double	perp_wall_dist;
+	double	wall_x;
+	double	step;
+	double	tex_pos;
+	double	denom;
+	t_texture	*tex;
+	unsigned int	color;
+	char	mch;
 
 	if (!g || !g->frame_img || !g->frame_addr)
 		return ;
@@ -1266,8 +1261,14 @@ void	render_frame(t_game *g)
 		ray_dir_y = g->diry + g->planey * camera_x;
 		map_x = (int)g->posx;
 		map_y = (int)g->posy;
-		delta_dist_x = (ray_dir_x == 0.0) ? 1e30 : fabs(1.0 / ray_dir_x);
-		delta_dist_y = (ray_dir_y == 0.0) ? 1e30 : fabs(1.0 / ray_dir_y);
+		if (ray_dir_x == 0.0)
+			delta_dist_x = 1e30;
+		else
+			delta_dist_x = fabs(1.0 / ray_dir_x);
+		if (ray_dir_y == 0.0)
+			delta_dist_y = 1e30;
+		else
+			delta_dist_y = fabs(1.0 / ray_dir_y);
 		hit = 0;
 		side = 0;
 		/* inicializar step y sideDist */
@@ -1320,9 +1321,21 @@ void	render_frame(t_game *g)
 		}
 		/* distancia perpendicular al muro */
 		if (side == 0)
-			perp_wall_dist = (map_x - g->posx + (1 - step_x) / 2.0) / (ray_dir_x == 0 ? 1e-6 : ray_dir_x);
+		{
+			if (ray_dir_x == 0)
+				denom = 1e-6;
+			else
+				denom = ray_dir_x;
+			perp_wall_dist = (map_x - g->posx + (1 - step_x) / 2.0) / denom;
+		}
 		else
-			perp_wall_dist = (map_y - g->posy + (1 - step_y) / 2.0) / (ray_dir_y == 0 ? 1e-6 : ray_dir_y);
+		{
+			if (ray_dir_y == 0)
+				denom = 1e-6;
+			else
+				denom = ray_dir_y;
+			perp_wall_dist = (map_y - g->posy + (1 - step_y) / 2.0) / denom;
+		}
 		if (perp_wall_dist <= 0.0)
 			perp_wall_dist = 1e-6;
 		/* altura de la línea a dibujar */
@@ -1435,8 +1448,8 @@ int	game_loop(void *param)
 int	mouse_move(int x, int y, void *param)
 {
 	t_game	*g;
-	int	dx;
-	double	rot_angle;
+	int		dx;
+	double	angle;
 	double	old_dir_x;
 	double	old_plane_x;
 
@@ -1452,17 +1465,14 @@ int	mouse_move(int x, int y, void *param)
 		dx = 50;
 	if (dx < -50)
 		dx = -50;
-	rot_angle = dx * 0.003;
+	angle = dx * 0.003;
 	old_dir_x = g->dirx;
-	g->dirx = g->dirx * cos(rot_angle) - g->diry * sin(rot_angle);
-	g->diry = old_dir_x * sin(rot_angle) + g->diry * cos(rot_angle);
+	g->dirx = g->dirx * cos(angle) - g->diry * sin(angle);
+	g->diry = old_dir_x * sin(angle) + g->diry * cos(angle);
 	old_plane_x = g->planex;
-	g->planex = g->planex * cos(rot_angle) - g->planey * sin(rot_angle);
-	g->planey = old_plane_x * sin(rot_angle) + g->planey * cos(rot_angle);
-	return (0);
+	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
+	return (g->planey = old_plane_x * sin(angle) + g->planey * cos(angle), 0);
 }
-
-//---------------------------------------------------------------------------------
 
 void	init_struct_g(t_game *g)
 {
@@ -1476,20 +1486,20 @@ void	init_struct_g(t_game *g)
 
 int	main(int argc, char **argv)
 {
-	int		fd;
-	int		fd_empty;
-	t_game	g;
-	char	*first_map_line;
-	int		py;
-	int		px;
-	char	orient;
-	char	tmp_empty_file[1];
-	int	empty_file;
+	int			fd;
+	int			fd_empty;
+	int			py;
+	int			px;
+	int			empty_file;
+	t_game		g;
+	char		*first_map_line;
+	char		orient;
+	char		tmp_empty_file[1];
 
 	if (argc != 2)
 		return (write(2, "Error\nArguments\n", 16), 1);
 	if (!extension_is_cub(argv[1]))
-		return (write(2, "Error\nExtension\n", 16), 1);	
+		return (write(2, "Error\nExtension\n", 16), 1);
 	fd_empty = open(argv[1], O_RDONLY);
 	if (fd_empty < 0)
 		return (perror("Error\nOpen"), 1);
@@ -1510,26 +1520,18 @@ int	main(int argc, char **argv)
 	first_map_line = NULL;
 	if (parse_headers(fd, &g, &first_map_line) < 0)
 	{
-		drain_gnl_fd(fd);
-		close(fd);
-		free_config(&g);
-		return (write(2, "Error\nHeader\n", 13), 1);
+		(drain_gnl_fd(fd), close(fd));		
+		return (free_config(&g), write(2, "Error\nHeader\n", 13), 1);
 	}
 	if (parse_map(fd, first_map_line, &g) < 0)
 	{
 		if (first_map_line)
 			free(first_map_line);
 		close(fd);
-		free_config(&g);
-		return (write(2, "Error\nInvalid map\n", 18), 1);
+		return (free_config(&g), write(2, "Error\nInvalid map\n", 18), 1);
 	}
 	if (check_empty_lines_in_map(&g) < 0)
-	{
-		free_map(&g);
-		free_config(&g);
-		close(fd);
-		return (1);
-	}
+		return (free_map(&g), free_config(&g), close(fd), 1);
 	if (pad_map(&g) < 0)
 		return (close(fd), free_map(&g), free_config(&g),
 			write(2, "Error\nMalloc\n", 13), 1);
@@ -1549,17 +1551,17 @@ int	main(int argc, char **argv)
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
 			free_map(&g), free_config(&g), 1);
-	// registrar movimiento del ratón 
+	// registrar movimiento del ratón
 	mlx_hook(g.window, 6, 64, mouse_move, &g);
-	// inicializar jugador/cámara con la posición encontrada 
+	// inicializar jugador/cámara con la posición encontrada
 	init_player(&g, py, px, orient);
 	if (create_frame(&g) < 0)
 		return (write(2, "Error\nMalloc frame\n", 19),
 			free_map(&g), free_config(&g), 1);
 	// registrar hooks
-	mlx_hook(g.window, 2, 1, key_press, &g);	// KeyPress 
-	mlx_hook(g.window, 3, 2, key_release, &g);	// KeyRelease 
-	mlx_hook(g.window, 17, 0, handle_close, &g);	// Window close (X)
+	mlx_hook(g.window, 2, 1, key_press, &g);
+	mlx_hook(g.window, 3, 2, key_release, &g);
+	mlx_hook(g.window, 17, 0, handle_close, &g);
 	mlx_loop_hook(g.mlx, game_loop, &g);
 	// arrancar loop
 	mlx_loop(g.mlx);
