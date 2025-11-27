@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/27 11:01:46 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/27 13:35:27 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1338,6 +1338,12 @@ int	main(int argc, char **argv)
 		return (write(2, "Error\nPlayer not found\n", 23),
 			free_map(&g), free_config(&g), 1);
 	close(fd);
+	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
+		|| load_texture(g.mlx, &g.texture_so, g.so) < 0
+		|| load_texture(g.mlx, &g.texture_we, g.we) < 0
+		|| load_texture(g.mlx, &g.texture_ea, g.ea) < 0)
+		return (write(2, "Error\nTexture load failed\n", 26),
+			free_map(&g), free_config(&g), 1);
 	g.window = mlx_new_window(g.mlx, g.screen_w, g.screen_h, "cub3D");
 	if (!g.window)
 		return (write(2, "Error\nmlx_new_window failed\n", 28),
@@ -1345,12 +1351,7 @@ int	main(int argc, char **argv)
 	// registrar movimiento del ratón 
 	mlx_hook(g.window, 6, 64, mouse_move, &g);
 	// cargar texturas
-	if (load_texture(g.mlx, &g.texture_no, g.no) < 0
-		|| load_texture(g.mlx, &g.texture_so, g.so) < 0
-		|| load_texture(g.mlx, &g.texture_we, g.we) < 0
-		|| load_texture(g.mlx, &g.texture_ea, g.ea) < 0)
-		return (write(2, "Error\nTexture load failed\n", 26),
-			free_map(&g), free_config(&g), 1);
+	
 	// inicializar jugador/cámara con la posición encontrada 
 	init_player(&g, py, px, orient);
 	if (create_frame(&g) < 0)
