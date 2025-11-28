@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/27 18:03:13 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/11/28 12:47:24 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ void	init_player(t_game *g, int py, int px, char orient);
 void	update_player(t_game *g, double delta);
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color);
 void	render_frame(t_game *g);
+void	init_struct_g(t_game *g);
 
 int		extension_is_cub(const char *fname);
 int		check_char(char c, int flag_walkable);
@@ -115,8 +116,8 @@ int		parse_uint0_255(const char **p, int *out);
 int		parse_color_values(const char *rest, int out_rgb[3]);
 int		set_texture(char **dst, const char *rest);
 int		is_header_line(const char *line);
-int		parse_one_header(const char *line, t_game *g);
 int		parse_headers(int fd, t_game *g, char **out_first_map_line);
+int		mouse_move(int x, int y, void *param);
 int		pad_map(t_game *g);
 int		find_player(t_game *g, int *out_y, int *out_x, char *out_orient);
 int		key_press(int keycode, void *param);
@@ -126,6 +127,7 @@ int		get_tex_pixel(t_texture *texture, int x, int y);
 int		create_frame(t_game *g);
 int		key_release(int keycode, void *param);
 int		game_loop(void *param);
+int		parse(char **argv, t_game *g, int *py, int *px, char *orient);
 
 char	**copy_map(t_game *g);
 char	*read_rest_of_file(int fd);
