@@ -6,7 +6,7 @@
 /*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/28 12:47:24 by victor           ###   ########.fr       */
+/*   Updated: 2025/11/30 20:44:47 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ typedef struct s_game
 	char	**map;
 	void		*mlx;
 	void		*window;
+	double			now;
 	t_texture		texture_no;
 	t_texture		texture_so;
 	t_texture		texture_we;
@@ -94,6 +95,38 @@ typedef struct s_game
 
 }			t_game;
 
+typedef struct s_render
+{
+	int	x;
+	int	map_x;
+	int	map_y;
+	int	step_x;
+	int	step_y;
+	int	hit;
+	int	side;
+	int	line_height;
+	int	draw_start;
+	int	draw_end;
+	int	tex_width;
+	int	tex_height;
+	int	tex_x;
+	int	tex_y;
+	double	camera_x;
+	double	ray_dir_x;
+	double	ray_dir_y;
+	double	side_dist_x;
+	double	side_dist_y;
+	double	delta_dist_x;
+	double	delta_dist_y;
+	double	perp_wall_dist;
+	double	wall_x;
+	double	step;
+	double	tex_pos;
+	double	denom;
+	unsigned int	color;
+	char	mch;
+}			t_render;
+
 void	free_config(t_game *g);
 void	free_copy(char **copy);
 void	free_map(t_game *g);
@@ -102,7 +135,7 @@ void	draw_background_to_frame(t_game *g);
 void	init_player(t_game *g, int py, int px, char orient);
 void	update_player(t_game *g, double delta);
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color);
-void	render_frame(t_game *g);
+void	render_frame(t_game *g, t_render *r, t_texture **tex);
 void	init_struct_g(t_game *g);
 
 int		extension_is_cub(const char *fname);
@@ -118,7 +151,7 @@ int		set_texture(char **dst, const char *rest);
 int		is_header_line(const char *line);
 int		parse_headers(int fd, t_game *g, char **out_first_map_line);
 int		mouse_move(int x, int y, void *param);
-int		pad_map(t_game *g);
+int		pad_map(t_game *g, int y);
 int		find_player(t_game *g, int *out_y, int *out_x, char *out_orient);
 int		key_press(int keycode, void *param);
 int		handle_close(void *param);
