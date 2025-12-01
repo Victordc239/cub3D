@@ -3,28 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/01 16:26:09 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/01 17:24:33 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
-
-void	drain_gnl_fd(int fd)
-{
-	char	*tmp;
-
-	if (fd < 0)
-		return ;
-	tmp = get_next_line(fd);
-	while (tmp)
-	{
-		free(tmp);
-		tmp = get_next_line(fd);
-	}
-}
 
 void	free_image(void *mlx, void **img_ptr, char **addr_ptr)
 {
@@ -63,47 +49,7 @@ void	free_config(t_game *g)
 	if (g->ea)
 		(free(g->ea), g->ea = NULL);
 }
-
-int	extension_is_cub(const char *fname)
-{
-	int	len;
-
-	if (!fname)
-		return (0);
-	len = ft_strlen(fname);
-	if (len < 4)
-		return (0);
-	return (ft_strcmp(fname + len - 4, ".cub") == 0);
-}
-
-int	check_char(char c, int flag_walkable)
-{
-	if (flag_walkable == 1)
-		return (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W');
-	else
-		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E'
-			|| c == 'W' || c == ' ');
-}
-
-int	flood_fill(t_game *g, char **visited, int y, int x)
-{
-	if (!(y >= 0 && y < g->map_height && x >= 0 && x < ft_strlen(visited[y])))
-		return (-1);
-	if (visited[y][x] == '1' || visited[y][x] == 'X')
-		return (0);
-	if (visited[y][x] == ' ')
-		return (-1);
-	visited[y][x] = 'X';
-	if (flood_fill(g, visited, y + 1, x) < 0)
-		return (-1);
-	if (flood_fill(g, visited, y - 1, x) < 0)
-		return (-1);
-	if (flood_fill(g, visited, y, x + 1) < 0)
-		return (-1);
-	if (flood_fill(g, visited, y, x - 1) < 0)
-		return (-1);
-	return (0);
-}
+//
 
 char	**copy_map(t_game *g)
 {
@@ -128,18 +74,6 @@ char	**copy_map(t_game *g)
 	}
 	copy[y] = NULL;
 	return (copy);
-}
-
-void	free_copy(char **copy)
-{
-	int	i;
-
-	i = 0;
-	if (!copy)
-		return ;
-	while (copy[i])
-		free(copy[i++]);
-	free(copy);
 }
 
 int	find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x)
@@ -169,6 +103,49 @@ int	find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x)
 	return (-1);
 }
 
+void	free_copy(char **copy)
+{
+	int	i;
+
+	i = 0;
+	if (!copy)
+		return ;
+	while (copy[i])
+		free(copy[i++]);
+	free(copy);
+}
+
+int	flood_fill(t_game *g, char **visited, int y, int x)
+{
+	if (!(y >= 0 && y < g->map_height && x >= 0 && x < ft_strlen(visited[y])))
+		return (-1);
+	if (visited[y][x] == '1' || visited[y][x] == 'X')
+		return (0);
+	if (visited[y][x] == ' ')
+		return (-1);
+	visited[y][x] = 'X';
+	if (flood_fill(g, visited, y + 1, x) < 0)
+		return (-1);
+	if (flood_fill(g, visited, y - 1, x) < 0)
+		return (-1);
+	if (flood_fill(g, visited, y, x + 1) < 0)
+		return (-1);
+	if (flood_fill(g, visited, y, x - 1) < 0)
+		return (-1);
+	return (0);
+}
+/// 
+
+int	check_char(char c, int flag_walkable)
+{
+	if (flag_walkable == 1)
+		return (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W');
+	else
+		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E'
+			|| c == 'W' || c == ' ');
+}
+/// 
+
 int	check_map_closed(t_game *g)
 {
 	int		py;
@@ -191,40 +168,12 @@ int	check_map_closed(t_game *g)
 		while (copy[y][++x])
 			if (check_char(copy[y][x], 1))
 				return (free_copy(copy),
-					write(2, "Error\nArea inaccessible\n", 24), -1);
+					write(2, "Error\nArea\n", 11), -1);
 		y++;
 	}
 	return (free_copy(copy), 0);
 }
-
-int	validate_map_chars(t_game *g)
-{
-	int	y;
-	int	x;
-	int	player_count;
-
-	if (!g || !g->map)
-		return (-1);
-	player_count = 0;
-	y = 0;
-	while (g->map[y])
-	{
-		x = 0;
-		while (g->map[y][x])
-		{
-			if (!check_char(g->map[y][x], 0))
-				return (write(2, "Error\nInvalid character in map\n", 31), -1);
-			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
-				|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
-				player_count++;
-			x++;
-		}
-		y++;
-	}
-	if (player_count != 1)
-		return (write(2, "Error\nInvalid player count\n", 27), -1);
-	return (0);
-}
+//
 
 char	*read_rest_of_file(int fd)
 {
@@ -340,21 +289,7 @@ int	parse_map(int fd, char *first_line, t_game *g)
 	return (free(big_map), 0);
 }
 
-void	free_map(t_game *g)
-{
-	int	i;
-
-	if (!g || !g->map)
-		return ;
-	i = 0;
-	while (g->map[i])
-	{
-		free(g->map[i]);
-		i++;
-	}
-	free(g->map);
-	g->map = NULL;
-}
+//
 
 int	is_blank_line(const char *s)
 {
@@ -391,17 +326,7 @@ int	check_empty_lines_in_map(t_game *g)
 	}
 	return (0);
 }
-
-void	strip_nl(char *s)
-{
-	size_t	len;
-
-	if (!s)
-		return ;
-	len = ft_strlen(s);
-	if (len > 0 && s[len - 1] == '\n')
-		s[len - 1] = '\0';
-}
+//
 
 int	parse_uint0_255(const char **p, int *out)
 {
@@ -449,24 +374,7 @@ int	parse_color_value(const char *rest, int out_rgb[3])
 		return (-1);
 	return (0);
 }
-
-int	set_texture(char **dst, const char *rest)
-{
-	const char	*p;
-	char		*copy;
-
-	p = rest;
-	while (*p == ' ' || *p == '\t')
-		p++;
-	if (*p == '\0' || *p == '\n')
-		return (-1);
-	copy = ft_strdup(p);
-	if (!copy)
-		return (-1);
-	strip_nl(copy);
-	*dst = copy;
-	return (0);
-}
+//
 
 int	is_header_line(const char *line)
 {
@@ -484,6 +392,35 @@ int	is_header_line(const char *line)
 		return (1);
 	if (line[0] == 'C' && (line[1] == ' ' || line[1] == '\t'))
 		return (1);
+	return (0);
+}
+
+void	strip_nl(char *s)
+{
+	size_t	len;
+
+	if (!s)
+		return ;
+	len = ft_strlen(s);
+	if (len > 0 && s[len - 1] == '\n')
+		s[len - 1] = '\0';
+}
+
+int	set_texture(char **dst, const char *rest)
+{
+	const char	*p;
+	char		*copy;
+
+	p = rest;
+	while (*p == ' ' || *p == '\t')
+		p++;
+	if (*p == '\0' || *p == '\n')
+		return (-1);
+	copy = ft_strdup(p);
+	if (!copy)
+		return (-1);
+	strip_nl(copy);
+	*dst = copy;
 	return (0);
 }
 
@@ -607,230 +544,7 @@ int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 	*out_first_map_line = NULL;
 	return (parse_headers_loop(fd, g, out_first_map_line, order));
 }
-
-int	pad_map(t_game *g, int y)
-{
-	int		len;
-	int		i;
-	char	*newrow;
-
-	if (!g || !g->map)
-		return (write(2, "Error\nStruct\n", 13), -1);
-	y = -1;
-	while (++y < g->map_height)
-	{
-		len = ft_strlen(g->map[y]);
-		if (len < g->map_width)
-		{
-			newrow = malloc(g->map_width + 1);
-			if (!newrow)
-				return (write(2, "Error\nMalloc\n", 13), -1);
-			i = -1;
-			while (++i < len)
-				newrow[i] = g->map[y][i];
-			while (i < g->map_width)
-				newrow[i++] = ' ';
-			newrow[i] = '\0';
-			(free(g->map[y]), g->map[y] = newrow);
-		}
-	}
-	return (0);
-}
-
-int	find_player(t_game *g, char *out_orient)
-{
-	int	y;
-	int	x;
-
-	if (!g || !g->map || !out_orient)
-		return (write(2, "Error\nStruct\n", 13), -1);
-	y = 0;
-	while (y < g->map_height)
-	{
-		x = 0;
-		while (g->map[y][x])
-		{
-			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
-			|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
-			{
-				g->init_player_y = y;
-				g->init_player_x = x;
-				*out_orient = g->map[y][x];
-				g->map[y][x] = '0';
-				return (0);
-			}
-			x++;
-		}
-		y++;
-	}
-	return (write(2, "Error\nPlayer not found\n", 23), -1);
-}
-
-int	key_press(int keycode, void *param)
-{
-	t_game	*g;
-
-	g = (t_game *)param;
-	if (keycode == 65307)
-		return (handle_close(g));
-	else if (keycode == 119 || keycode == 'w')
-		g->key_w = 1;
-	else if (keycode == 115 || keycode == 's')
-		g->key_s = 1;
-	else if (keycode == 97 || keycode == 'a')
-		g->key_a = 1;
-	else if (keycode == 100 || keycode == 'd')
-		g->key_d = 1;
-	else if (keycode == 65361)
-		g->key_left = 1;
-	else if (keycode == 65363)
-		g->key_right = 1;
-	return (0);
-}
-
-int	handle_close(void *param)
-{
-	t_game	*g;
-
-	g = (t_game *)param;
-	(void)g;
-	free_map(g);
-	free_config(g);
-	exit(0);
-	return (0);
-}
-
-int	load_texture(void *mlx, t_texture *texture, char *path)
-{
-	texture->imagen = mlx_xpm_file_to_image(mlx, path,
-			&texture->width, &texture->height);
-	if (!texture->imagen)
-		return (write(2, "Error\nTexture load failed\n", 26), -1);
-	texture->addr = mlx_get_data_addr(texture->imagen, &texture->bit_by_pixel,
-			&texture->line_len_byte, &texture->endian);
-	return (0);
-}
-
-int	get_tex_pixel(t_texture *texture, int x, int y)
-{
-	char	*px;
-
-	if (x < 0 || x >= texture->width || y < 0 || y >= texture->height)
-		return (0);
-	px = texture->addr + (y * texture->line_len_byte + x
-			* (texture->bit_by_pixel / 8));
-	return (*(unsigned int *)px);
-}
-
-void	draw_background_to_frame(t_game *g)
-{
-	int				x;
-	int				y;
-	unsigned int	color_c;
-	unsigned int	color_f;
-
-	if (!g || !g->frame_img || !g->frame_addr)
-		return ;
-	color_c = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
-	color_f = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
-	y = 0;
-	while (y < g->screen_h)
-	{
-		x = 0;
-		while (x < g->screen_w)
-		{
-			if (y < g->screen_h / 2)
-				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
-						+ x * (g->frame_bpp / 8)) = color_c;
-			else
-				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
-						+ x * (g->frame_bpp / 8)) = color_f;
-			x++;
-		}
-		y++;
-	}
-}
-
-void	init_player(t_game *g, char orient)
-{
-	g->dirx = 0.0;
-	g->diry = 0.0;
-	g->planex = 0.0;
-	g->planey = 0.0;
-	if (orient == 'N')
-	{
-		g->diry = -1.0;
-		g->planex = 0.66;
-	}
-	else if (orient == 'S')
-	{
-		g->diry = 1.0;
-		g->planex = -0.66;
-	}
-	else if (orient == 'E')
-	{
-		g->dirx = 1.0;
-		g->planey = 0.66;
-	}
-	else if (orient == 'W')
-	{
-		g->dirx = -1.0;
-		g->planey = -0.66;
-	}
-}
-
-int	create_frame(t_game *g)
-{
-	if (g->frame_img)
-		mlx_destroy_image(g->mlx, g->frame_img);
-	g->frame_img = mlx_new_image(g->mlx, g->screen_w, g->screen_h);
-	if (!g->frame_img)
-		return (write(2, "Error\nMalloc frame\n", 19), -1);
-	g->frame_addr = mlx_get_data_addr(g->frame_img,
-			&g->frame_bpp, &g->frame_line_len, &g->frame_endian);
-	return (0);
-}
-
-double	get_time_s(void)
-{
-	struct timeval	tv;
-
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec + tv.tv_usec / 1000000.0);
-}
-
-int	key_release(int keycode, void *param)
-{
-	t_game	*g;
-
-	g = (t_game *)param;
-	if (keycode == 119 || keycode == 'w')
-		g->key_w = 0;
-	else if (keycode == 115 || keycode == 's')
-		g->key_s = 0;
-	else if (keycode == 97 || keycode == 'a')
-		g->key_a = 0;
-	else if (keycode == 100 || keycode == 'd')
-		g->key_d = 0;
-	else if (keycode == 65361)
-		g->key_left = 0;
-	else if (keycode == 65363)
-		g->key_right = 0;
-	return (0);
-}
-
-void	rotate_player(t_game *g, double angle)
-{
-	double	old_dir_x;
-	double	old_plane_x;
-
-	old_dir_x = g->dirx;
-	g->dirx = g->dirx * cos(angle) - g->diry * sin(angle);
-	g->diry = old_dir_x * sin(angle) + g->diry * cos(angle);
-	old_plane_x = g->planex;
-	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
-	g->planey = old_plane_x * sin(angle) + g->planey * cos(angle);
-}
+//
 
 void	move_forward_backward(t_game *g, double move_speed, int direction)
 {
@@ -866,6 +580,19 @@ void	move_left_right(t_game *g, double move_speed, int direction)
 		g->posx = nx;
 }
 
+void	rotate_player(t_game *g, double angle)
+{
+	double	old_dir_x;
+	double	old_plane_x;
+
+	old_dir_x = g->dirx;
+	g->dirx = g->dirx * cos(angle) - g->diry * sin(angle);
+	g->diry = old_dir_x * sin(angle) + g->diry * cos(angle);
+	old_plane_x = g->planex;
+	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
+	g->planey = old_plane_x * sin(angle) + g->planey * cos(angle);
+}
+
 void	update_player(t_game *g, double delta)
 {
 	double	move_speed;
@@ -886,6 +613,18 @@ void	update_player(t_game *g, double delta)
 	if (g->key_right)
 		rotate_player(g, rot_speed);
 }
+//
+
+int	get_tex_pixel(t_texture *texture, int x, int y)
+{
+	char	*px;
+
+	if (x < 0 || x >= texture->width || y < 0 || y >= texture->height)
+		return (0);
+	px = texture->addr + (y * texture->line_len_byte + x
+			* (texture->bit_by_pixel / 8));
+	return (*(unsigned int *)px);
+}
 
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
 {
@@ -899,25 +638,36 @@ void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
 	*(unsigned int *)dst = color;
 }
 
-t_texture	*choose_wall_texture(t_game *g, t_render *r)
+void	render_column(t_game *g, t_render *r, t_texture *tex)
 {
-	if (!g || !r)
-		return (NULL);
-	if (r->side == 0)
+	r->tex_x = (int)(r->wall_x * (double)r->tex_width);
+	if ((r->side == 0 && r->ray_dir_x > 0)
+		|| (r->side == 1 && r->ray_dir_y < 0))
+		r->tex_x = r->tex_width - r->tex_x - 1;
+	if (r->tex_x < 0)
+		r->tex_x = 0;
+	if (r->tex_x >= r->tex_width)
+		r->tex_x = r->tex_width - 1;
+	r->step = 1.0 * r->tex_height / (double)r->line_height;
+	r->tex_pos = (r->draw_start - g->screen_h / 2 + r->line_height / 2)
+		* r->step;
+	while (r->draw_start <= r->draw_end)
 	{
-		if (r->ray_dir_x > 0)
-			return (&g->texture_we);
-		else
-			return (&g->texture_ea);
-	}
-	else
-	{
-		if (r->ray_dir_y > 0)
-			return (&g->texture_no);
-		else
-			return (&g->texture_so);
+		r->tex_y = (int)r->tex_pos;
+		if (r->tex_y < 0)
+			r->tex_y = 0;
+		if (r->tex_y >= r->tex_height)
+			r->tex_y = r->tex_height - 1;
+		r->tex_pos += r->step;
+		r->color = get_tex_pixel(tex, r->tex_x, r->tex_y);
+		if (r->side == 1)
+			r->color = ((r->color & 0xFEFEFE) >> 1);
+		put_pixel_frame(g, r->x, r->draw_start, r->color);
+		r->draw_start++;
 	}
 }
+
+//
 
 void	init_render_vars(t_game *g, t_render *r, int x)
 {
@@ -1020,32 +770,23 @@ void	compute_projection(t_game *g, t_render *r)
 		r->draw_end = g->screen_h - 1;
 }
 
-void	render_column(t_game *g, t_render *r, t_texture *tex)
+t_texture	*choose_wall_texture(t_game *g, t_render *r)
 {
-	r->tex_x = (int)(r->wall_x * (double)r->tex_width);
-	if ((r->side == 0 && r->ray_dir_x > 0)
-		|| (r->side == 1 && r->ray_dir_y < 0))
-		r->tex_x = r->tex_width - r->tex_x - 1;
-	if (r->tex_x < 0)
-		r->tex_x = 0;
-	if (r->tex_x >= r->tex_width)
-		r->tex_x = r->tex_width - 1;
-	r->step = 1.0 * r->tex_height / (double)r->line_height;
-	r->tex_pos = (r->draw_start - g->screen_h / 2 + r->line_height / 2)
-		* r->step;
-	while (r->draw_start <= r->draw_end)
+	if (!g || !r)
+		return (NULL);
+	if (r->side == 0)
 	{
-		r->tex_y = (int)r->tex_pos;
-		if (r->tex_y < 0)
-			r->tex_y = 0;
-		if (r->tex_y >= r->tex_height)
-			r->tex_y = r->tex_height - 1;
-		r->tex_pos += r->step;
-		r->color = get_tex_pixel(tex, r->tex_x, r->tex_y);
-		if (r->side == 1)
-			r->color = ((r->color & 0xFEFEFE) >> 1);
-		put_pixel_frame(g, r->x, r->draw_start, r->color);
-		r->draw_start++;
+		if (r->ray_dir_x > 0)
+			return (&g->texture_we);
+		else
+			return (&g->texture_ea);
+	}
+	else
+	{
+		if (r->ray_dir_y > 0)
+			return (&g->texture_no);
+		else
+			return (&g->texture_so);
 	}
 }
 
@@ -1077,6 +818,56 @@ void	render_frame(t_game *g, t_render *r, t_texture **tex)
 		r->x++;
 	}
 }
+//
+
+double	get_time_s(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec + tv.tv_usec / 1000000.0);
+}
+
+int	create_frame(t_game *g)
+{
+	if (g->frame_img)
+		mlx_destroy_image(g->mlx, g->frame_img);
+	g->frame_img = mlx_new_image(g->mlx, g->screen_w, g->screen_h);
+	if (!g->frame_img)
+		return (write(2, "Error\nMalloc frame\n", 19), -1);
+	g->frame_addr = mlx_get_data_addr(g->frame_img,
+			&g->frame_bpp, &g->frame_line_len, &g->frame_endian);
+	return (0);
+}
+
+void	draw_background_to_frame(t_game *g)
+{
+	int				x;
+	int				y;
+	unsigned int	color_c;
+	unsigned int	color_f;
+
+	if (!g || !g->frame_img || !g->frame_addr)
+		return ;
+	color_c = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
+	color_f = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
+	y = 0;
+	while (y < g->screen_h)
+	{
+		x = 0;
+		while (x < g->screen_w)
+		{
+			if (y < g->screen_h / 2)
+				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
+						+ x * (g->frame_bpp / 8)) = color_c;
+			else
+				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
+						+ x * (g->frame_bpp / 8)) = color_f;
+			x++;
+		}
+		y++;
+	}
+}
 
 int	game_loop(void *param)
 {
@@ -1101,6 +892,293 @@ int	game_loop(void *param)
 	draw_background_to_frame(g);
 	render_frame(g, &r, &tex);
 	mlx_put_image_to_window(g->mlx, g->window, g->frame_img, 0, 0);
+	return (0);
+}
+//
+
+int	extension_is_cub(const char *fname)
+{
+	int	len;
+
+	if (!fname)
+		return (0);
+	len = ft_strlen(fname);
+	if (len < 4)
+		return (0);
+	return (ft_strcmp(fname + len - 4, ".cub") == 0);
+}
+
+int	check_file_empty(const char *path)
+{
+	int		fd;
+	int		result;
+	char	tmp[1];
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return (perror("Error\nOpen"), -1);
+	result = read(fd, tmp, 1);
+	if (result < 0)
+	{
+		close(fd);
+		return (perror("Error\nRead"), -1);
+	}
+	if (result == 0)
+	{
+		close(fd);
+		return (write(1, "Error\nEmpty file\n", 17), -1);
+	}
+	close(fd);
+	return (0);
+}
+
+void	init_struct_g(t_game *g)
+{
+	if (!g)
+		return ;
+	ft_memset(g, 0, sizeof(*g));
+	g->screen_w = 1920;
+	g->screen_h = 1080;
+	g->mlx = mlx_init();
+}
+
+void	free_map(t_game *g)
+{
+	int	i;
+
+	if (!g || !g->map)
+		return ;
+	i = 0;
+	while (g->map[i])
+	{
+		free(g->map[i]);
+		i++;
+	}
+	free(g->map);
+	g->map = NULL;
+}
+
+void	drain_gnl_fd(int fd)
+{
+	char	*tmp;
+
+	if (fd < 0)
+		return ;
+	tmp = get_next_line(fd);
+	while (tmp)
+	{
+		free(tmp);
+		tmp = get_next_line(fd);
+	}
+}
+
+int	pad_map(t_game *g, int y)
+{
+	int		len;
+	int		i;
+	char	*newrow;
+
+	if (!g || !g->map)
+		return (write(2, "Error\nStruct\n", 13), -1);
+	y = -1;
+	while (++y < g->map_height)
+	{
+		len = ft_strlen(g->map[y]);
+		if (len < g->map_width)
+		{
+			newrow = malloc(g->map_width + 1);
+			if (!newrow)
+				return (write(2, "Error\nMalloc\n", 13), -1);
+			i = -1;
+			while (++i < len)
+				newrow[i] = g->map[y][i];
+			while (i < g->map_width)
+				newrow[i++] = ' ';
+			newrow[i] = '\0';
+			(free(g->map[y]), g->map[y] = newrow);
+		}
+	}
+	return (0);
+}
+
+int	validate_map_chars(t_game *g)
+{
+	int	y;
+	int	x;
+	int	player_count;
+
+	if (!g || !g->map)
+		return (-1);
+	player_count = 0;
+	y = 0;
+	while (g->map[y])
+	{
+		x = 0;
+		while (g->map[y][x])
+		{
+			if (!check_char(g->map[y][x], 0))
+				return (write(2, "Error\nInvalid character in map\n", 31), -1);
+			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
+				|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
+				player_count++;
+			x++;
+		}
+		y++;
+	}
+	if (player_count != 1)
+		return (write(2, "Error\nInvalid player count\n", 27), -1);
+	return (0);
+}
+
+int	find_player(t_game *g, char *out_orient)
+{
+	int	y;
+	int	x;
+
+	if (!g || !g->map || !out_orient)
+		return (write(2, "Error\nStruct\n", 13), -1);
+	y = 0;
+	while (y < g->map_height)
+	{
+		x = 0;
+		while (g->map[y][x])
+		{
+			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
+			|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
+			{
+				g->init_player_y = y;
+				g->init_player_x = x;
+				*out_orient = g->map[y][x];
+				g->map[y][x] = '0';
+				return (0);
+			}
+			x++;
+		}
+		y++;
+	}
+	return (write(2, "Error\nPlayer not found\n", 23), -1);
+}
+
+int	parse(char **argv, t_game *g, char *orient)
+{
+	int		fd;
+	char	*first_map_line;
+
+	first_map_line = NULL;
+	if (!extension_is_cub(argv[1]))
+		return (write(2, "Error\nExtension\n", 16), -1);
+	if (check_file_empty(argv[1]) < 0)
+		return (-1);
+	fd = open(argv[1], O_RDONLY);
+	if (fd < 0)
+		return (perror("Error\nOpen"), -1);
+	init_struct_g(g);
+	if (!g->mlx)
+		return (close(fd), perror("Error\nmlx_init failed\n"),
+			free_map(g), free_config(g), -1);
+	if (parse_headers(fd, g, &first_map_line) < 0)
+		return (drain_gnl_fd(fd), close(fd), free_config(g),
+			write(2, "Error\nHeader\n", 13), -1);
+	if (parse_map(fd, first_map_line, g) < 0)
+		return (close(fd), free_config(g), -1);
+	if (check_empty_lines_in_map(g) < 0 || pad_map(g, 0) < 0
+		|| validate_map_chars(g) < 0 || check_map_closed(g) < 0
+		|| find_player(g, orient) < 0)
+		return (free_map(g), free_config(g), close(fd), -1);
+	return (close(fd), 0);
+}
+//
+
+int	load_texture(void *mlx, t_texture *texture, char *path)
+{
+	texture->imagen = mlx_xpm_file_to_image(mlx, path,
+			&texture->width, &texture->height);
+	if (!texture->imagen)
+		return (write(2, "Error\nTexture load failed\n", 26), -1);
+	texture->addr = mlx_get_data_addr(texture->imagen, &texture->bit_by_pixel,
+			&texture->line_len_byte, &texture->endian);
+	return (0);
+}
+
+int	handle_close(void *param)
+{
+	t_game	*g;
+
+	g = (t_game *)param;
+	(void)g;
+	free_map(g);
+	free_config(g);
+	exit(0);
+	return (0);
+}
+
+void	init_player(t_game *g, char orient)
+{
+	g->dirx = 0.0;
+	g->diry = 0.0;
+	g->planex = 0.0;
+	g->planey = 0.0;
+	if (orient == 'N')
+	{
+		g->diry = -1.0;
+		g->planex = 0.66;
+	}
+	else if (orient == 'S')
+	{
+		g->diry = 1.0;
+		g->planex = -0.66;
+	}
+	else if (orient == 'E')
+	{
+		g->dirx = 1.0;
+		g->planey = 0.66;
+	}
+	else if (orient == 'W')
+	{
+		g->dirx = -1.0;
+		g->planey = -0.66;
+	}
+}
+
+int	key_press(int keycode, void *param)
+{
+	t_game	*g;
+
+	g = (t_game *)param;
+	if (keycode == 65307)
+		return (handle_close(g));
+	else if (keycode == 119 || keycode == 'w')
+		g->key_w = 1;
+	else if (keycode == 115 || keycode == 's')
+		g->key_s = 1;
+	else if (keycode == 97 || keycode == 'a')
+		g->key_a = 1;
+	else if (keycode == 100 || keycode == 'd')
+		g->key_d = 1;
+	else if (keycode == 65361)
+		g->key_left = 1;
+	else if (keycode == 65363)
+		g->key_right = 1;
+	return (0);
+}
+
+int	key_release(int keycode, void *param)
+{
+	t_game	*g;
+
+	g = (t_game *)param;
+	if (keycode == 119 || keycode == 'w')
+		g->key_w = 0;
+	else if (keycode == 115 || keycode == 's')
+		g->key_s = 0;
+	else if (keycode == 97 || keycode == 'a')
+		g->key_a = 0;
+	else if (keycode == 100 || keycode == 'd')
+		g->key_d = 0;
+	else if (keycode == 65361)
+		g->key_left = 0;
+	else if (keycode == 65363)
+		g->key_right = 0;
 	return (0);
 }
 
@@ -1131,69 +1209,6 @@ int	mouse_move(int x, int y, void *param)
 	old_plane_x = g->planex;
 	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
 	return (g->planey = old_plane_x * sin(angle) + g->planey * cos(angle), 0);
-}
-
-void	init_struct_g(t_game *g)
-{
-	if (!g)
-		return ;
-	ft_memset(g, 0, sizeof(*g));
-	g->screen_w = 1920;
-	g->screen_h = 1080;
-	g->mlx = mlx_init();
-}
-
-int	check_file_empty(const char *path)
-{
-	int		fd;
-	int		result;
-	char	tmp[1];
-
-	fd = open(path, O_RDONLY);
-	if (fd < 0)
-		return (perror("Error\nOpen"), -1);
-	result = read(fd, tmp, 1);
-	if (result < 0)
-	{
-		close(fd);
-		return (perror("Error\nRead"), -1);
-	}
-	if (result == 0)
-	{
-		close(fd);
-		return (perror("Error\nEmpty file\n"), -1);
-	}
-	close(fd);
-	return (0);
-}
-
-int	parse(char **argv, t_game *g, char *orient)
-{
-	int		fd;
-	char	*first_map_line;
-
-	first_map_line = NULL;
-	if (!extension_is_cub(argv[1]))
-		return (write(2, "Error\nExtension\n", 16), -1);
-	if (check_file_empty(argv[1]) < 0)
-		return (-1);
-	fd = open(argv[1], O_RDONLY);
-	if (fd < 0)
-		return (perror("Error\nOpen"), -1);
-	init_struct_g(g);
-	if (!g->mlx)
-		return (close(fd), perror("Error\nmlx_init failed\n"),
-			free_map(g), free_config(g), -1);
-	if (parse_headers(fd, g, &first_map_line) < 0)
-		return (drain_gnl_fd(fd), close(fd), free_config(g),
-			write(2, "Error\nHeader\n", 13), -1);
-	if (parse_map(fd, first_map_line, g) < 0)
-		return (close(fd), free_config(g), -1);
-	if (check_empty_lines_in_map(g) < 0 || pad_map(g, 0) < 0
-		|| validate_map_chars(g) < 0 || check_map_closed(g) < 0
-		|| find_player(g, orient) < 0)
-		return (free_map(g), free_config(g), close(fd), -1);
-	return (close(fd), 0);
 }
 
 int	main(int argc, char **argv)
