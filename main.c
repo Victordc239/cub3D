@@ -6,7 +6,7 @@
 /*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/30 20:54:59 by victor           ###   ########.fr       */
+/*   Updated: 2025/12/01 11:32:01 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,42 +26,30 @@ void	drain_gnl_fd(int fd)
 	}
 }
 
+void	free_image(void *mlx, void **img_ptr, char **addr_ptr)
+{
+	if (!mlx || !img_ptr)
+		return ;
+	if (*img_ptr)
+	{
+		mlx_destroy_image(mlx, *img_ptr);
+		*img_ptr = NULL;
+		if (addr_ptr)
+			*addr_ptr = NULL;
+	}
+}
+
 void	free_config(t_game *g)
 {
 	if (!g)
 		return ;
 	if (g->mlx)
 	{
-		if (g->texture_no.imagen)
-		{
-			mlx_destroy_image(g->mlx, g->texture_no.imagen);
-			g->texture_no.imagen = NULL;
-			g->texture_no.addr = NULL;
-		}
-		if (g->texture_so.imagen)
-		{
-			mlx_destroy_image(g->mlx, g->texture_so.imagen);
-			g->texture_so.imagen = NULL;
-			g->texture_so.addr = NULL;
-		}
-		if (g->texture_we.imagen)
-		{
-			mlx_destroy_image(g->mlx, g->texture_we.imagen);
-			g->texture_we.imagen = NULL;
-			g->texture_we.addr = NULL;
-		}
-		if (g->texture_ea.imagen)
-		{
-			mlx_destroy_image(g->mlx, g->texture_ea.imagen);
-			g->texture_ea.imagen = NULL;
-			g->texture_ea.addr = NULL;
-		}
-		if (g->frame_img)
-		{
-			mlx_destroy_image(g->mlx, g->frame_img);
-			g->frame_img = NULL;
-			g->frame_addr = NULL;
-		}
+		free_image(g->mlx, &g->texture_no.imagen, &g->texture_no.addr);
+		free_image(g->mlx, &g->texture_so.imagen, &g->texture_so.addr);
+		free_image(g->mlx, &g->texture_we.imagen, &g->texture_we.addr);
+		free_image(g->mlx, &g->texture_ea.imagen, &g->texture_ea.addr);
+		free_image(g->mlx, &g->frame_img, &g->frame_addr);
 		if (g->window)
 			(mlx_destroy_window(g->mlx, g->window), g->window = NULL);
 		(mlx_destroy_display(g->mlx), free(g->mlx), g->mlx = NULL);
@@ -74,12 +62,6 @@ void	free_config(t_game *g)
 		(free(g->we), g->we = NULL);
 	if (g->ea)
 		(free(g->ea), g->ea = NULL);
-	g->has_no = 0;
-	g->has_so = 0;
-	g->has_we = 0;
-	g->has_ea = 0;
-	g->has_floor = 0;
-	g->has_ceiling = 0;
 }
 
 int	extension_is_cub(const char *fname)
@@ -780,7 +762,7 @@ int	parse_one_header_ordered(const char *line, t_game *g, int *order)
 	return (free(trim), 0);
 }
 
-int	parse_headers(int fd, t_game *g, char **out_first_map_line)
+/* int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 {
 	char	*line;
 	int		order[6];
@@ -818,6 +800,50 @@ int	parse_headers(int fd, t_game *g, char **out_first_map_line)
 		|| !g->has_ceiling)
 		return (-1);
 	return (0);
+} */
+
+int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line, int order[6])
+{
+	char	*line;
+
+	line = get_next_line(fd);
+	while (line != NULL)
+	{
+		if (is_blank_line(line))
+		{
+			(free(line), line = get_next_line(fd));
+			continue ;
+		}
+		if (is_header_line(line))
+		{
+			if (parse_one_header_ordered(line, g, order) < 0)
+				return (free(line), -1);
+			(free(line), line = get_next_line(fd));
+			continue ;
+		}
+		if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea
+			|| !g->has_floor || !g->has_ceiling)
+			return (free(line), -1);
+		return (*out_first_map_line = line, 0);
+	}
+	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_floor
+		|| !g->has_ceiling)
+		return (-1);
+	return (0);
+}
+
+int	parse_headers(int fd, t_game *g, char **out_first_map_line)
+{
+	int	order[6];
+	int	i;
+
+	i = 0;
+	while (i < 6)
+		order[i++] = 0;
+	if (!g || !out_first_map_line)
+		return (-1);
+	*out_first_map_line = NULL;
+	return (parse_headers_loop(fd, g, out_first_map_line, order));
 }
 
 int	pad_map(t_game *g, int y)
@@ -849,12 +875,12 @@ int	pad_map(t_game *g, int y)
 	return (0);
 }
 
-int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
+int	find_player(t_game *g, char *out_orient)
 {
 	int	y;
 	int	x;
 
-	if (!g || !g->map || !out_y || !out_x || !out_orient)
+	if (!g || !g->map || !out_orient)
 		return (write(2, "Error\nStruct\n", 13), -1);
 	y = 0;
 	while (y < g->map_height)
@@ -865,8 +891,8 @@ int	find_player(t_game *g, int *out_y, int *out_x, char *out_orient)
 			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
 			|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
 			{
-				*out_y = y;
-				*out_x = x;
+				g->init_player_y = y;
+				g->init_player_x = x;
 				*out_orient = g->map[y][x];
 				g->map[y][x] = '0';
 				return (0);
@@ -963,10 +989,10 @@ void	draw_background_to_frame(t_game *g)
 	}
 }
 
-void	init_player(t_game *g, int py, int px, char orient)
+/*void init_player(t_game *g, char orient) 
 {
-	g->posx = (double)px + 0.5;
-	g->posy = (double)py + 0.5;
+	g->posx = (double)g->init_player_x + 0.5;
+	g->posy = (double)g->init_player_y + 0.5;
 	if (orient == 'N')
 	{
 		g->dirx = 0.0;
@@ -993,6 +1019,34 @@ void	init_player(t_game *g, int py, int px, char orient)
 		g->dirx = -1.0;
 		g->diry = 0.0;
 		g->planex = 0.0;
+		g->planey = -0.66;
+	}
+}*/
+
+void	init_player(t_game *g, char orient)
+{
+	g->dirx = 0.0;
+	g->diry = 0.0;
+	g->planex = 0.0;
+	g->planey = 0.0;
+	if (orient == 'N')
+	{
+		g->diry = -1.0;
+		g->planex = 0.66;
+	}
+	else if (orient == 'S')
+	{
+		g->diry = 1.0;
+		g->planex = -0.66;
+	}
+	else if (orient == 'E')
+	{
+		g->dirx = 1.0;
+		g->planey = 0.66;
+	}
+	else if (orient == 'W')
+	{
+		g->dirx = -1.0;
 		g->planey = -0.66;
 	}
 }
@@ -1037,10 +1091,8 @@ int	key_release(int keycode, void *param)
 	return (0);
 }
 
-/*void	update_player(t_game *g, double delta)
+/* void	update_player(t_game *g, double delta, double move_speed, double rot_speed)
 {
-	double	move_speed;
-	double	rot_speed;
 	double	nx;
 	double	ny;
 	double	old_dir_x;
@@ -1110,74 +1162,74 @@ int	key_release(int keycode, void *param)
 		g->planex = g->planex * cos(rot_speed) - g->planey * sin(rot_speed);
 		g->planey = old_plane_x * sin(rot_speed) + g->planey * cos(rot_speed);
 	}
-}*/
+} */
+
+void	rotate_player(t_game *g, double angle)
+{
+	double	old_dir_x;
+	double	old_plane_x;
+
+	old_dir_x = g->dirx;
+	g->dirx = g->dirx * cos(angle) - g->diry * sin(angle);
+	g->diry = old_dir_x * sin(angle) + g->diry * cos(angle);
+	old_plane_x = g->planex;
+	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
+	g->planey = old_plane_x * sin(angle) + g->planey * cos(angle);
+}
+
+void	move_forward_backward(t_game *g, double move_speed, int direction)
+{
+	double	nx;
+	double	ny;
+
+	nx = g->posx + g->dirx * move_speed * direction;
+	ny = g->posy + g->diry * move_speed * direction;
+	if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0
+		&& (int)g->posx < g->map_width && g->map[(int)ny][(int)g->posx] != '1'
+		&& g->map[(int)ny][(int)g->posx] != ' ')
+		g->posy = ny;
+	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0
+		&& nx < g->map_width && g->map[(int)g->posy][(int)nx] != '1'
+		&& g->map[(int)g->posy][(int)nx] != ' ')
+		g->posx = nx;
+}
+
+void	move_left_right(t_game *g, double move_speed, int direction)
+{
+	double	nx;
+	double	ny;
+
+	nx = g->posx + g->planex * move_speed * direction;
+	ny = g->posy + g->planey * move_speed * direction;
+	if (ny >= 0 && ny < g->map_height && (int)g->posx < g->map_width
+		&& (int)g->posx >= 0 && g->map[(int)ny][(int)g->posx] != '1'
+		&& g->map[(int)ny][(int)g->posx] != ' ')
+		g->posy = ny;
+	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0
+		&& nx < g->map_width && g->map[(int)g->posy][(int)nx] != '1'
+		&& g->map[(int)g->posy][(int)nx] != ' ')
+		g->posx = nx;
+}
 
 void	update_player(t_game *g, double delta)
 {
 	double	move_speed;
 	double	rot_speed;
-	double	nx;
-	double	ny;
-	double	old_dir_x;
-	double	old_plane_x;
 
 	move_speed = 3.0 * delta;
-	rot_speed  = 2.0 * delta;
+	rot_speed = 2.0 * delta;
 	if (g->key_w)
-	{
-		nx = g->posx + g->dirx * move_speed;
-		ny = g->posy + g->diry * move_speed;
-		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
-			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
-			g->posy = ny;
-		if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0 && nx < g->map_width
-			&& g->map[(int)g->posy][(int)nx] != '1' && g->map[(int)g->posy][(int)nx] != ' ')
-			g->posx = nx;
-	}
+		move_forward_backward(g, move_speed, +1);
 	if (g->key_s)
-	{
-		nx = g->posx - g->dirx * move_speed;
-		ny = g->posy - g->diry * move_speed;
-		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
-			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
-			g->posy = ny;
-		if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0 && nx < g->map_width
-			&& g->map[(int)g->posy][(int)nx] != '1' && g->map[(int)g->posy][(int)nx] != ' ')
-			g->posx = nx;
-	}
+		move_forward_backward(g, move_speed, -1);
 	if (g->key_a)
-	{
-		nx = g->posx - g->planex * move_speed;
-		ny = g->posy - g->planey * move_speed;
-		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
-			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
-			g->posy = ny;
-		if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0 && nx < g->map_width
-			&& g->map[(int)g->posy][(int)nx] != '1' && g->map[(int)g->posy][(int)nx] != ' ')
-			g->posx = nx;
-	}
+		move_left_right(g, move_speed, -1);
 	if (g->key_d)
-	{
-		nx = g->posx + g->planex * move_speed;
-		ny = g->posy + g->planey * move_speed;
-		if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0 && (int)g->posx < g->map_width
-			&& g->map[(int)ny][(int)g->posx] != '1' && g->map[(int)ny][(int)g->posx] != ' ')
-			g->posy = ny;
-		if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0 && nx < g->map_width
-			&& g->map[(int)g->posy][(int)nx] != '1' && g->map[(int)g->posy][(int)nx] != ' ')
-			g->posx = nx;
-	}
-	if (g->key_left || g->key_right)
-	{
-		if (g->key_left)
-			rot_speed = -rot_speed;
-		old_dir_x = g->dirx;
-		g->dirx = g->dirx * cos(rot_speed) - g->diry * sin(rot_speed);
-		g->diry = old_dir_x * sin(rot_speed) + g->diry * cos(rot_speed);
-		old_plane_x = g->planex;
-		g->planex = g->planex * cos(rot_speed) - g->planey * sin(rot_speed);
-		g->planey = old_plane_x * sin(rot_speed) + g->planey * cos(rot_speed);
-	}
+		move_left_right(g, move_speed, +1);
+	if (g->key_left)
+		rotate_player(g, -rot_speed);
+	if (g->key_right)
+		rotate_player(g, rot_speed);
 }
 
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
@@ -1192,25 +1244,26 @@ void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
 	*(unsigned int *)dst = color;
 }
 
-t_texture	*choose_wall_texture(t_game *g, int side, double ray_dir_x, double ray_dir_y)
+t_texture	*choose_wall_texture(t_game *g, t_render *r)
 {
-	if (!g)
+	if (!g || !r)
 		return (NULL);
-	if (side == 0)
+	if (r->side == 0)
 	{
-		if (ray_dir_x > 0)
+		if (r->ray_dir_x > 0)
 			return (&g->texture_we);
 		else
 			return (&g->texture_ea);
 	}
 	else
 	{
-		if (ray_dir_y > 0)
+		if (r->ray_dir_y > 0)
 			return (&g->texture_no);
 		else
 			return (&g->texture_so);
 	}
 }
+
 /* 
 void	render_frame(t_game *g)
 {
@@ -1299,7 +1352,8 @@ void	render_frame(t_game *g)
 				map_y += step_y;
 				side = 1;
 			}
-			if (map_y < 0 || map_y >= g->map_height || map_x < 0 || map_x >= g->map_width)
+			if (map_y < 0 || map_y >= g->map_height
+				|| map_x < 0 || map_x >= g->map_width)
 			{
 				hit = 1;
 				break ;
@@ -1456,7 +1510,7 @@ void	compute_projection(t_game *g, t_render *r)
 			r->denom = 1e-6;
 		else
 			r->denom = r->ray_dir_x;
-		r->perp_wall_dist = (r->map_x - g->posx + (1 - r->step_x) / 2.0) / r->denom;
+		r->wall_dist = (r->map_x - g->posx + (1 - r->step_x) / 2.0) / r->denom;
 	}
 	else
 	{
@@ -1464,11 +1518,11 @@ void	compute_projection(t_game *g, t_render *r)
 			r->denom = 1e-6;
 		else
 			r->denom = r->ray_dir_y;
-		r->perp_wall_dist = (r->map_y - g->posy + (1 - r->step_y) / 2.0) / r->denom;
+		r->wall_dist = (r->map_y - g->posy + (1 - r->step_y) / 2.0) / r->denom;
 	}
-	if (r->perp_wall_dist <= 0.0)
-		r->perp_wall_dist = 1e-6;
-	r->line_height = (int)(g->screen_h / r->perp_wall_dist);
+	if (r->wall_dist <= 0.0)
+		r->wall_dist = 1e-6;
+	r->line_height = (int)(g->screen_h / r->wall_dist);
 	r->draw_start = -r->line_height / 2 + g->screen_h / 2;
 	if (r->draw_start < 0)
 		r->draw_start = 0;
@@ -1488,7 +1542,8 @@ void	render_column(t_game *g, t_render *r, t_texture *tex)
 	if (r->tex_x >= r->tex_width)
 		r->tex_x = r->tex_width - 1;
 	r->step = 1.0 * r->tex_height / (double)r->line_height;
-	r->tex_pos = (r->draw_start - g->screen_h / 2 + r->line_height / 2) * r->step;
+	r->tex_pos = (r->draw_start - g->screen_h / 2 + r->line_height / 2)
+		* r->step;
 	while (r->draw_start <= r->draw_end)
 	{
 		r->tex_y = (int)r->tex_pos;
@@ -1517,32 +1572,30 @@ void	render_frame(t_game *g, t_render *r, t_texture **tex)
 		perform_dda(g, r);
 		compute_projection(g, r);
 		if (r->side == 0)
-			r->wall_x = g->posy + r->perp_wall_dist * r->ray_dir_y;
+			r->wall_x = g->posy + r->wall_dist * r->ray_dir_y;
 		else
-			r->wall_x = g->posx + r->perp_wall_dist * r->ray_dir_x;
+			r->wall_x = g->posx + r->wall_dist * r->ray_dir_x;
 		r->wall_x -= floor(r->wall_x);
-		*tex = choose_wall_texture(g, r->side, r->ray_dir_x, r->ray_dir_y);
+		*tex = choose_wall_texture(g, r);
 		if (!(*tex) || !(*tex)->addr || (*tex)->width <= 0)
 		{
 			r->x++;
-			continue;
+			continue ;
 		}
-		r->tex_width  = (*tex)->width;
+		r->tex_width = (*tex)->width;
 		r->tex_height = (*tex)->height;
 		render_column(g, r, *tex);
 		r->x++;
 	}
 }
 
-/* ---------------------------------------------------------------------- */
-
 int	game_loop(void *param)
 {
 	static double	last;
 	double			delta;
 	t_game			*g;
-	t_render			r;
-	t_texture			*tex;
+	t_render		r;
+	t_texture		*tex;
 
 	g = (t_game *)param;
 	g->now = get_time_s();
@@ -1680,26 +1733,41 @@ void	init_struct_g(t_game *g)
 	return (free_map(&g), free_config(&g), 0);
 }*/
 
-int	parse(char **argv, t_game *g, int *py, int *px, char *orient)
+int	check_file_empty(const char *path)
 {
 	int		fd;
-	int		fd_empty;
-	int		empty_file;
-	char	tmp_empty_file[1];
+	int		result;
+	char	tmp[1];
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return (perror("Error\nOpen"), -1);
+	result = read(fd, tmp, 1);
+	if (result < 0)
+	{
+		close(fd);
+		return (perror("Error\nRead"), -1);
+	}
+	if (result == 0)
+	{
+		close(fd);
+		return (perror("Error\nEmpty file\n"), -1);
+	}
+	close(fd);
+	return (0);
+}
+
+int	parse(char **argv, t_game *g, char *orient)
+{
+	int		fd;
 	char	*first_map_line;
 
 	first_map_line = NULL;
 	if (!extension_is_cub(argv[1]))
 		return (write(2, "Error\nExtension\n", 16), -1);
-	fd_empty = open(argv[1], O_RDONLY);
-	if (fd_empty < 0)
-		return (perror("Error\nOpen"), -1);
-	empty_file = read(fd_empty, tmp_empty_file, 1);
-	if (empty_file < 0)
-		return (close(fd_empty), perror("Error\nRead"), -1);
-	if (empty_file == 0)
-		return (close(fd_empty), perror("Error\nEmpty file\n"), -1);
-	(close(fd_empty), fd = open(argv[1], O_RDONLY));
+	if (check_file_empty(argv[1]) < 0)
+		return (-1);
+	fd = open(argv[1], O_RDONLY);
 	if (fd < 0)
 		return (perror("Error\nOpen"), -1);
 	init_struct_g(g);
@@ -1711,22 +1779,21 @@ int	parse(char **argv, t_game *g, int *py, int *px, char *orient)
 			write(2, "Error\nHeader\n", 13), -1);
 	if (parse_map(fd, first_map_line, g) < 0)
 		return (close(fd), free_config(g), -1);
-	if (check_empty_lines_in_map(g) < 0 || pad_map(g, 0) < 0 || validate_map_chars(g) < 0
-		|| check_map_closed(g) < 0 || find_player(g, py, px, orient) < 0)
+	if (check_empty_lines_in_map(g) < 0 || pad_map(g, 0) < 0
+		|| validate_map_chars(g) < 0 || check_map_closed(g) < 0
+		|| find_player(g, orient) < 0)
 		return (free_map(g), free_config(g), close(fd), -1);
 	return (close(fd), 0);
 }
 
 int	main(int argc, char **argv)
 {
-	int			py;
-	int			px;
 	t_game		g;
 	char		orient;
 
 	if (argc != 2)
 		return (write(2, "Error\nArguments\n", 16), -1);
-	if (parse(argv, &g, &py, &px, &orient) < 0)
+	if (parse(argv, &g, &orient) < 0)
 		return (1);
 	if (load_texture(g.mlx, &g.texture_no, g.no) < 0 || load_texture(g.mlx,
 			&g.texture_so, g.so) < 0 || load_texture(g.mlx, &g.texture_we,
@@ -1735,13 +1802,15 @@ int	main(int argc, char **argv)
 	g.window = mlx_new_window(g.mlx, g.screen_w, g.screen_h, "cub3D");
 	if (!g.window)
 		return (perror("Error\nWindow\n"), free_map(&g), free_config(&g), 1);
-	mlx_hook(g.window, 6, 64, mouse_move, &g);
-	init_player(&g, py, px, orient);
+	g.posx = (double)g.init_player_x + 0.5;
+	g.posy = (double)g.init_player_y + 0.5;
+	init_player(&g, orient);
 	if (create_frame(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);
 	mlx_hook(g.window, 2, 1, key_press, &g);
 	mlx_hook(g.window, 3, 2, key_release, &g);
 	mlx_hook(g.window, 17, 0, handle_close, &g);
+	mlx_hook(g.window, 6, 64, mouse_move, &g);
 	(mlx_loop_hook(g.mlx, game_loop, &g), mlx_loop(g.mlx));
 	return (free_map(&g), free_config(&g), 0);
 }

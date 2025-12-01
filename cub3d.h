@@ -6,7 +6,7 @@
 /*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/11/30 20:44:47 by victor           ###   ########.fr       */
+/*   Updated: 2025/12/01 10:42:06 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,15 +56,15 @@ typedef struct s_game
 	char	**map;
 	void		*mlx;
 	void		*window;
-	double			now;
-	t_texture		texture_no;
-	t_texture		texture_so;
-	t_texture		texture_we;
-	t_texture		texture_ea;
+	double	now;
+	t_texture	texture_no;
+	t_texture	texture_so;
+	t_texture	texture_we;
+	t_texture	texture_ea;
 
 	/* pantalla */
-	int	screen_w;
-	int	screen_h;
+	int		screen_w;
+	int		screen_h;
 
 	/* jugador / cámara */
 	double	posx;
@@ -75,42 +75,46 @@ typedef struct s_game
 	double	planey;
 
 	/* input */
-	int	key_w;
-	int	key_s;
-	int	key_a;
-	int	key_d;
-	int	key_left;
-	int	key_right;
+	int		key_w;
+	int		key_s;
+	int		key_a;
+	int		key_d;
+	int		key_left;
+	int		key_right;
 
 	/* frame buffer (imagen) */
 	void	*frame_img;
 	char	*frame_addr;
-	int	frame_bpp;
-	int	frame_line_len;
-	int	frame_endian;
+	int		frame_bpp;
+	int		frame_line_len;
+	int		frame_endian;
 
 	/*mouse*/
-	int	mouse_last_x;
-	int	mouse_last_y;
+	int		mouse_last_x;
+	int		mouse_last_y;
+
+	/*player*/
+	int		init_player_x;
+	int		init_player_y;
 
 }			t_game;
 
 typedef struct s_render
 {
-	int	x;
-	int	map_x;
-	int	map_y;
-	int	step_x;
-	int	step_y;
-	int	hit;
-	int	side;
-	int	line_height;
-	int	draw_start;
-	int	draw_end;
-	int	tex_width;
-	int	tex_height;
-	int	tex_x;
-	int	tex_y;
+	int		x;
+	int		map_x;
+	int		map_y;
+	int		step_x;
+	int		step_y;
+	int		hit;
+	int		side;
+	int		line_height;
+	int		draw_start;
+	int		draw_end;
+	int		tex_width;
+	int		tex_height;
+	int		tex_x;
+	int		tex_y;
 	double	camera_x;
 	double	ray_dir_x;
 	double	ray_dir_y;
@@ -118,7 +122,7 @@ typedef struct s_render
 	double	side_dist_y;
 	double	delta_dist_x;
 	double	delta_dist_y;
-	double	perp_wall_dist;
+	double	wall_dist;
 	double	wall_x;
 	double	step;
 	double	tex_pos;
@@ -132,11 +136,21 @@ void	free_copy(char **copy);
 void	free_map(t_game *g);
 void	strip_nl(char *s);
 void	draw_background_to_frame(t_game *g);
-void	init_player(t_game *g, int py, int px, char orient);
+void	init_player(t_game *g, char orient);
 void	update_player(t_game *g, double delta);
 void	put_pixel_frame(t_game *g, int x, int y, unsigned int color);
 void	render_frame(t_game *g, t_render *r, t_texture **tex);
 void	init_struct_g(t_game *g);
+void	move_left_right(t_game *g, double move_speed, int direction);
+void	move_forward_backward(t_game *g, double move_speed, int direction);
+void	rotate_player(t_game *g, double angle);
+void	free_image(void *mlx, void **img_ptr, char **addr_ptr);
+void	drain_gnl_fd(int fd);
+void	init_render_vars(t_game *g, t_render *r, int x);
+void	init_steps(t_game *g, t_render *r);
+void	perform_dda(t_game *g, t_render *r);
+void	compute_projection(t_game *g, t_render *r);
+void	render_column(t_game *g, t_render *r, t_texture *tex);
 
 int		extension_is_cub(const char *fname);
 int		check_char(char c, int flag_walkable);
@@ -152,7 +166,7 @@ int		is_header_line(const char *line);
 int		parse_headers(int fd, t_game *g, char **out_first_map_line);
 int		mouse_move(int x, int y, void *param);
 int		pad_map(t_game *g, int y);
-int		find_player(t_game *g, int *out_y, int *out_x, char *out_orient);
+int		find_player(t_game *g, char *out_orient);
 int		key_press(int keycode, void *param);
 int		handle_close(void *param);
 int		load_texture(void *mlx, t_texture *texture, char *path);
@@ -160,13 +174,17 @@ int		get_tex_pixel(t_texture *texture, int x, int y);
 int		create_frame(t_game *g);
 int		key_release(int keycode, void *param);
 int		game_loop(void *param);
-int		parse(char **argv, t_game *g, int *py, int *px, char *orient);
+int		parse(char **argv, t_game *g, char *orient);
+int		check_file_empty(const char *path);
+int		find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x);
+int		check_empty_lines_in_map(t_game *g);
+int		parse_one_header_ordered(const char *line, t_game *g, int *order);
 
 char	**copy_map(t_game *g);
 char	*read_rest_of_file(int fd);
 
 double	get_time_s(void);
 
-t_texture	*choose_wall_texture(t_game *g, int side, double ray_dir_x, double ray_dir_y);
+t_texture	*choose_wall_texture(t_game *g, t_render *r);
 
 #endif
