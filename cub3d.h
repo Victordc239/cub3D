@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/01 10:42:06 by victor           ###   ########.fr       */
+/*   Updated: 2025/12/01 16:22:07 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,11 @@ typedef struct s_game
 	int		has_ea;
 	int		floor[3];
 	int		ceiling[3];
-	int		has_floor;
-	int		has_ceiling;
+	int		has_f;
+	int		has_c;
 	int		map_height;
 	int		map_width;
+	int		y;
 	char	**map;
 	void		*mlx;
 	void		*window;
@@ -160,7 +161,7 @@ int		validate_map_chars(t_game *g);
 int		parse_map(int fd, char *first_line, t_game *g);
 int		is_blank_line(const char *s);
 int		parse_uint0_255(const char **p, int *out);
-int		parse_color_values(const char *rest, int out_rgb[3]);
+int		parse_color_value(const char *rest, int out_rgb[3]);
 int		set_texture(char **dst, const char *rest);
 int		is_header_line(const char *line);
 int		parse_headers(int fd, t_game *g, char **out_first_map_line);
