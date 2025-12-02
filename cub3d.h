@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/02 17:31:58 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:47:43 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,6 +189,7 @@ int		check_all_visited(t_game *g, char *visited, size_t w, size_t h);
 int		bfs_from_start(t_game *g, char *visited, int *queue, size_t start);
 int		process_neighbor(t_game *g, char *visited, int *queue, size_t *tail);
 int		find_player_pos(t_game *g, int *out_py, int *out_px);
+int		apply_header_action(int idx, t_game *g, char *trim);
 int		allocate_visited_and_queue(long long total, char **visited_out,
 							int **queue_out);
 
