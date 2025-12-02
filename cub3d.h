@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/01 16:22:07 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:31:58 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,9 @@ typedef struct s_game
 	int		init_player_x;
 	int		init_player_y;
 
+	/*parse*/
+	size_t	npos;
+
 }			t_game;
 
 typedef struct s_render
@@ -180,6 +183,14 @@ int		check_file_empty(const char *path);
 int		find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x);
 int		check_empty_lines_in_map(t_game *g);
 int		parse_one_header_ordered(const char *line, t_game *g, int *order);
+int		build_map_from_lines(t_game *g, char **lines, size_t count);
+int		grow_lines(char ***lines, size_t *cap, size_t count, char *line);
+int		check_all_visited(t_game *g, char *visited, size_t w, size_t h);
+int		bfs_from_start(t_game *g, char *visited, int *queue, size_t start);
+int		process_neighbor(t_game *g, char *visited, int *queue, size_t *tail);
+int		find_player_pos(t_game *g, int *out_py, int *out_px);
+int		allocate_visited_and_queue(long long total, char **visited_out,
+							int **queue_out);
 
 char	**copy_map(t_game *g);
 char	*read_rest_of_file(int fd);

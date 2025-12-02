@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/02 16:24:14 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:30:52 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,71 +49,6 @@ void	free_config(t_game *g)
 	if (g->ea)
 		(free(g->ea), g->ea = NULL);
 }
-//
-
-char	**copy_map(t_game *g)
-{
-	char	**copy;
-	int		y;
-
-	copy = malloc(sizeof(char *) * (g->map_height + 1));
-	if (!copy)
-		return (NULL);
-	y = 0;
-	while (y < g->map_height)
-	{
-		copy[y] = ft_strdup(g->map[y]);
-		if (!copy[y])
-		{
-			while (--y >= 0)
-				free(copy[y]);
-			free(copy);
-			return (NULL);
-		}
-		y++;
-	}
-	copy[y] = NULL;
-	return (copy);
-}
-
-int	find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x)
-{
-	int	y;
-	int	x;
-
-	if (!copy || !out_y || !out_x)
-		return (-1);
-	y = 0;
-	while (y < map_height)
-	{
-		x = 0;
-		while (copy[y][x])
-		{
-			if (copy[y][x] == 'N' || copy[y][x] == 'S'
-				|| copy[y][x] == 'E' || copy[y][x] == 'W')
-			{
-				*out_y = y;
-				*out_x = x;
-				return (0);
-			}
-			x++;
-		}
-		y++;
-	}
-	return (-1);
-}
-
-void	free_copy(char **copy)
-{
-	int	i;
-
-	i = 0;
-	if (!copy)
-		return ;
-	while (copy[i])
-		free(copy[i++]);
-	free(copy);
-}
 
 int	flood_fill(t_game *g, char **visited, int y, int x)
 {
@@ -144,37 +79,9 @@ int	check_char(char c, int flag_walkable)
 		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E'
 			|| c == 'W' || c == ' ');
 }
-/// 
+///
 
-/*int	check_map_closed(t_game *g)
-{
-	int		py;
-	int		px;
-	char	**copy;
-	int		y;
-	int		x;
-
-	copy = copy_map(g);
-	if (!copy)
-		return (-1);
-	if (find_player_in_copy(copy, g->map_height, &py, &px) < 0)
-		return (free_copy(copy), write(2, "Error\nPlayer not found\n", 23), -1);
-	if (flood_fill(g, copy, py, px) < 0)
-		return (free_copy(copy), write(2, "Error\nMap not closed\n", 21), -1);
-	y = 0;
-	while (copy[y])
-	{
-		x = -1;
-		while (copy[y][++x])
-			if (check_char(copy[y][x], 1))
-				return (free_copy(copy),
-					write(2, "Error\nArea\n", 11), -1);
-		y++;
-	}
-	return (free_copy(copy), 0);
-}*/
-
-int	check_map_closed(t_game *g)
+/* int	check_map_closed(t_game *g)
 {
 	size_t	h;
 	size_t	w;
@@ -336,125 +243,172 @@ int	check_map_closed(t_game *g)
 		++i;
 	}
 	return (free(queue), free(visited), 0);
-}
+} */
 
-//
-
-char	*read_rest_of_file(int fd)
+int	find_player_pos(t_game *g, int *out_py, int *out_px)
 {
-	char	*line;
-	char	*all;
-	char	*tmp;
+	size_t	i;
+	size_t	j;
 
-	all = ft_strdup("");
-	if (!all)
-		return (NULL);
-	line = get_next_line(fd);
-	while (line != NULL)
-	{
-		tmp = ft_strjoin(all, line);
-		free(all);
-		free(line);
-		if (!tmp)
-			return (NULL);
-		all = tmp;
-		line = get_next_line(fd);
-	}
-	return (all);
-}
-
-int	count_lines(const char *s)
-{
-	int	i;
-	int	c;
-
-	if (!s)
-		return (0);
-	i = 0;
-	c = 0;
-	while (s[i])
-		if (s[i++] == '\n')
-			c++;
-	if (i > 0 && s[i - 1] != '\n')
-		c++;
-	return (c);
-}
-
-int	alloc_copy_line(t_game *g, const char *big, int start, int len)
-{
-	g->map[g->y] = malloc(len + 1);
-	if (!g->map[g->y])
-	{
-		while (--g->y >= 0)
-			free(g->map[g->y]);
-		free(g->map);
+	if (!g || !g->map || !out_py || !out_px)
 		return (-1);
+	*out_py = -1;
+	*out_px = -1;
+	i = 0;
+	while (i < (size_t)g->map_height)
+	{
+		j = 0;
+		while (j < (size_t)ft_strlen(g->map[i]))
+		{
+			if (g->map[i][j] == 'N' || g->map[i][j] == 'S'
+				|| g->map[i][j] == 'E' || g->map[i][j] == 'W')
+			{
+				*out_py = (int)i;
+				*out_px = (int)j;
+				return (0);
+			}
+			++j;
+		}
+		++i;
 	}
-	if (len)
-		ft_memcpy(g->map[g->y], big + start, len);
-	g->map[g->y][len] = '\0';
+	return (-1);
+}
+
+int	allocate_visited_and_queue(long long total, char **visited_out,
+						int **queue_out)
+{
+	*visited_out = NULL;
+	*queue_out = NULL;
+	if (total <= 0)
+		return (-1);
+	*visited_out = ft_calloc((size_t)total, 1);
+	if (!*visited_out)
+		return (perror("Error\nMalloc\n"), -1);
+	*queue_out = malloc(sizeof(int) * (size_t)total);
+	if (!*queue_out)
+		return (free(*visited_out), perror("Error\nMalloc\n"), -1);
 	return (0);
 }
 
-int	fill_map_from_big(t_game *g, const char *big)
+int	process_neighbor(t_game *g, char *visited, int *queue, size_t *tail)
 {
-	int	idx;
-	int	start;
-	int	len;
+	int	ny;
+	int	nx;
 
-	idx = -1;
-	start = 0;
-	while (big[++idx])
+	ny = (int)(g->npos / g->map_width);
+	nx = (int)(g->npos % g->map_width);
+	if (visited[g->npos])
+		return (0);
+	visited[g->npos] = 1;
+	if (g->map[ny][nx] == ' ')
+		return (write(2, "Error\nMap not closed\n", 21), -1);
+	if (g->map[ny][nx] != '1')
 	{
-		if (big[idx] == '\n')
-		{
-			len = idx - start;
-			if (alloc_copy_line(g, big, start, len) < 0)
-				return (-1);
-			start = idx + 1;
-			g->y++;
-		}
+		queue[(*tail)++] = (int)g->npos;
 	}
-	if (start < idx)
-	{
-		len = idx - start;
-		if (alloc_copy_line(g, big, start, len) < 0)
-			return (-1);
-		g->y++;
-	}
-	return (g->map[g->y] = NULL, 0);
+	return (0);
 }
 
-/*int	parse_map(int fd, char *first_line, t_game *g)
+int	bfs_from_start(t_game *g, char *visited, int *queue, size_t start)
 {
-	char	*rest;
-	char	*big_map;
+	long	pos;
+	size_t	head;
+	size_t	tail;
 	int		y;
+	int		x;
 
-	if (!first_line || !g)
-		return (perror("Error\nStruct\n"), -1);
-	rest = read_rest_of_file(fd);
-	if (!rest)
-		return (perror("Error\nRead\n"), free(first_line), -1);
-	big_map = ft_strjoin(first_line, rest);
-	(free(first_line), free(rest));
-	if (!big_map)
-		return (perror("Error\nJoin Map\n"), -1);
-	g->map_height = count_lines(big_map);
-	g->map = malloc(sizeof(char *) * (g->map_height + 1));
-	if (!g->map)
-		return (perror("Error\nMalloc\n"), free(big_map), -1);
-	if (fill_map_from_big(g, big_map) < 0)
-		return (free(big_map), perror("Error\nInvalid map\n"), -1);
-	g->map_width = 0;
-	y = -1;
-	while (g->map[++y])
-		if (ft_strlen(g->map[y]) > g->map_width)
-			g->map_width = ft_strlen(g->map[y]);
-	return (free(big_map), 0);
-}*/
+	tail = 0;
+	head = 0;
+	visited[start] = 1;
+	queue[tail++] = (int)start;
+	while (head < tail)
+	{
+		pos = queue[head++];
+		y = (int)(pos / (long)g->map_width);
+		x = (int)(pos % (long)g->map_width);
+		if (g->map[y][x] == ' ')
+			return (write(2, "Error\nMap not closed\n", 21), -1);
+		if ((size_t)(y + 1) < (size_t)g->map_height)
+		{
+			g->npos = (size_t)(y + 1) * g->map_width + (size_t)x;
+			if (process_neighbor(g, visited, queue, &tail) < 0)
+				return (-1);
+		}
+		if (y > 0)
+		{
+			g->npos = (size_t)(y - 1) * g->map_width + (size_t)x;
+			if (process_neighbor(g, visited, queue, &tail) < 0)
+				return (-1);
+		}
+		if ((size_t)(x + 1) < (size_t)g->map_width)
+		{
+			g->npos = (size_t)y * g->map_width + (size_t)(x + 1);
+			if (process_neighbor(g, visited, queue, &tail) < 0)
+				return (-1);
+		}
+		if (x > 0)
+		{
+			g->npos = (size_t)y * g->map_width + (size_t)(x - 1);
+			if (process_neighbor(g, visited, queue, &tail) < 0)
+				return (-1);
+		}
+	}
+	return (0);
+}
 
-int	parse_map(int fd, char *first_line, t_game *g)
+int	check_all_visited(t_game *g, char *visited, size_t w, size_t h)
+{
+	size_t	i;
+	size_t	j;
+
+	i = 0;
+	while (i < h)
+	{
+		j = 0;
+		while (j < w)
+		{
+			if (check_char(g->map[i][j], 1))
+			{
+				if (!visited[i * w + j])
+					return (write(2, "Error\nArea\n", 11), -1);
+			}
+			++j;
+		}
+		++i;
+	}
+	return (0);
+}
+
+int	check_map_closed(t_game *g)
+{
+	long long	total;
+	char		*visited;
+	int			*queue;
+	int			px;
+	int			py;
+
+	visited = NULL;
+	queue = NULL;
+	if (!g || !g->map)
+		return (write(2, "Error\nStruct\n", 13), -1);
+	if (g->map_height == 0 || g->map_width == 0)
+		return (write(2, "Error\nInvalid map size\n", 22), -1);
+	if (find_player_pos(g, &py, &px) < 0)
+		return (write(2, "Error\nPlayer not found\n", 23), -1);
+	total = (long long)g->map_height * (long long)g->map_width;
+	if (allocate_visited_and_queue(total, &visited, &queue) < 0)
+		return (-1);
+	if (bfs_from_start(g, visited, queue,
+			((size_t)py * g->map_width + (size_t)px)) < 0)
+		return (free(queue), free(visited), -1);
+	if (check_all_visited(g, visited, g->map_width, g->map_height) < 0)
+		return (free(queue), free(visited), -1);
+	return (free(queue), free(visited), 0);
+}
+
+/*-----------------------------------------------------------------*/
+
+/* int	parse_map(int fd, char *first_line, t_game *g)
 {
 	char	**lines = NULL;
 	char	*line;
@@ -519,7 +473,96 @@ int	parse_map(int fd, char *first_line, t_game *g)
 	}
 	g->map[g->y] = NULL;
 	return (free(lines), 0);
+} */
+
+int	grow_lines(char ***lines, size_t *cap, size_t count, char *line)
+{
+	size_t	newcap;
+	char	**tmp;
+	size_t	i;
+
+	newcap = (*cap) * 2;
+	tmp = malloc(sizeof(char *) * newcap);
+	if (!tmp)
+	{
+		free(line);
+		while (count--)
+			free((*lines)[count]);
+		free(*lines);
+		perror("Error\nMalloc\n");
+		return (-1);
+	}
+	i = 0;
+	while (i < count)
+	{
+		tmp[i] = (*lines)[i];
+		i++;
+	}
+	free(*lines);
+	*lines = tmp;
+	*cap = newcap;
+	return (0);
 }
+
+int	build_map_from_lines(t_game *g, char **lines, size_t count)
+{
+	size_t	i;
+
+	g->map_height = (int)count;
+	g->map = malloc(sizeof(char *) * (g->map_height + 1));
+	if (!g->map)
+	{
+		while (count--)
+			free(lines[count]);
+		free(lines);
+		perror("Error\nMalloc\n");
+		return (-1);
+	}
+	i = 0;
+	g->y = 0;
+	g->map_width = 0;
+	while (i < count)
+	{
+		strip_nl(lines[i]);
+		g->map[g->y++] = lines[i];
+		if ((int)ft_strlen(lines[i]) > g->map_width)
+			g->map_width = ft_strlen(lines[i]);
+		i++;
+	}
+	g->map[g->y] = NULL;
+	return (free(lines), 0);
+}
+
+int	parse_map(int fd, char *first_line, t_game *g)
+{
+	char	**lines;
+	char	*line;
+	size_t	cap;
+	size_t	count;
+
+	if (!first_line || !g)
+		return (perror("Error\nStruct\n"), -1);
+	cap = 64;
+	lines = malloc(sizeof(char *) * cap);
+	if (!lines)
+		return (free(first_line), perror("Error\nMalloc\n"), -1);
+	count = 0;
+	lines[count++] = first_line;
+	line = get_next_line(fd);
+	while (line != NULL)
+	{
+		if (count >= cap)
+			if (grow_lines(&lines, &cap, count, line) < 0)
+				return (-1);
+		lines[count++] = line;
+		line = get_next_line(fd);
+	}
+	if (build_map_from_lines(g, lines, count) < 0)
+		return (-1);
+	return (0);
+}
+
+/*--------------------------------------------------------------------------*/
 //
 
 int	is_blank_line(const char *s)
