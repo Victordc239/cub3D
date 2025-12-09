@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   6.c                                                :+:      :+:    :+:   */
+/*   4.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:51:47 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/02 17:18:46 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/09 14:45:12 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	is_header_line(const char *line)
 	return (0);
 }
 
-int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line, int order[6])
+int	consume_headers_until_map_or_eof(int fd, t_game *g, char **out_first_map_line, int order[6])
 {
 	char	*line;
 
@@ -53,14 +53,16 @@ int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line, int order[6
 	{
 		if (is_blank_line(line))
 		{
-			(free(line), line = get_next_line(fd));
+			free(line);
+			line = get_next_line(fd);
 			continue ;
 		}
 		if (is_header_line(line))
 		{
 			if (parse_one_header_ordered(line, g, order) < 0)
 				return (free(line), -1);
-			(free(line), line = get_next_line(fd));
+			free(line);
+			line = get_next_line(fd);
 			continue ;
 		}
 		if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea
@@ -68,6 +70,18 @@ int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line, int order[6
 			return (free(line), -1);
 		return (*out_first_map_line = line, 0);
 	}
+	return (1);
+}
+
+int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line, int order[6])
+{
+	int	result;
+
+	result = consume_headers_until_map_or_eof(fd, g, out_first_map_line, order);
+	if (result == -1)
+		return (-1);
+	if (result == 0)
+		return (0);
 	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_f
 		|| !g->has_c)
 		return (-1);
