@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/02 17:47:43 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/09 16:50:57 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,8 @@ typedef struct s_game
 	int		map_width;
 	int		y;
 	char	**map;
-	void		*mlx;
-	void		*window;
+	void	*mlx;
+	void	*window;
 	double	now;
 	t_texture	texture_no;
 	t_texture	texture_so;
@@ -100,6 +100,8 @@ typedef struct s_game
 
 	/*parse*/
 	size_t	npos;
+	size_t	x_neighbor;
+	size_t	y_neighbor;
 
 }			t_game;
 
@@ -131,7 +133,7 @@ typedef struct s_render
 	double	step;
 	double	tex_pos;
 	double	denom;
-	unsigned int	color;
+	unsigned int		color;
 	char	mch;
 }			t_render;
 
@@ -180,7 +182,6 @@ int		key_release(int keycode, void *param);
 int		game_loop(void *param);
 int		parse(char **argv, t_game *g, char *orient);
 int		check_file_empty(const char *path);
-int		find_player_in_copy(char **copy, int map_height, int *out_y, int *out_x);
 int		check_empty_lines_in_map(t_game *g);
 int		parse_one_header_ordered(const char *line, t_game *g, int *order);
 int		build_map_from_lines(t_game *g, char **lines, size_t count);
@@ -190,8 +191,16 @@ int		bfs_from_start(t_game *g, char *visited, int *queue, size_t start);
 int		process_neighbor(t_game *g, char *visited, int *queue, size_t *tail);
 int		find_player_pos(t_game *g, int *out_py, int *out_px);
 int		apply_header_action(int idx, t_game *g, char *trim);
+int		find_player_in_copy(char **copy, int map_height, int *out_y,
+			int *out_x);
+int		process_neighbors_of(t_game *g, char *visited, int *queue,
+			size_t *tail);
+int		parse_headers_loop(int fd, t_game *g,
+			char **out_first_map_line, int order[6]);
+int		consume_headers_until_map_or_eof(int fd, t_game *g,
+			char **out_first_map_line, int order[6]);
 int		allocate_visited_and_queue(long long total, char **visited_out,
-							int **queue_out);
+			int **queue_out);
 
 char	**copy_map(t_game *g);
 char	*read_rest_of_file(int fd);
