@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:51:47 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/09 14:45:12 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/09 17:00:18 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ int	is_header_line(const char *line)
 	return (0);
 }
 
-int	consume_headers_until_map_or_eof(int fd, t_game *g, char **out_first_map_line, int order[6])
+int	consume_headers_until_map_or_eof(int fd, t_game *g,
+		char **out_first_map_line, int order[6])
 {
 	char	*line;
 
@@ -73,7 +74,8 @@ int	consume_headers_until_map_or_eof(int fd, t_game *g, char **out_first_map_lin
 	return (1);
 }
 
-int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line, int order[6])
+int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line,
+		int order[6])
 {
 	int	result;
 
