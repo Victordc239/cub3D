@@ -6,7 +6,7 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/09 16:50:57 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/09 17:02:37 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,22 +58,26 @@ typedef struct s_game
 	void	*mlx;
 	void	*window;
 	double	now;
+
+	/* textures */
 	t_texture	texture_no;
 	t_texture	texture_so;
 	t_texture	texture_we;
 	t_texture	texture_ea;
 
-	/* pantalla */
+	/* screen */
 	int		screen_w;
 	int		screen_h;
 
-	/* jugador / cámara */
+	/* player */
 	double	posx;
 	double	posy;
 	double	dirx;
 	double	diry;
 	double	planex;
 	double	planey;
+	int		init_player_x;
+	int		init_player_y;
 
 	/* input */
 	int		key_w;
@@ -83,22 +87,18 @@ typedef struct s_game
 	int		key_left;
 	int		key_right;
 
-	/* frame buffer (imagen) */
+	/* frame buffer */
 	void	*frame_img;
 	char	*frame_addr;
 	int		frame_bpp;
 	int		frame_line_len;
 	int		frame_endian;
 
-	/*mouse*/
+	/* mouse */
 	int		mouse_last_x;
 	int		mouse_last_y;
 
-	/*player*/
-	int		init_player_x;
-	int		init_player_y;
-
-	/*parse*/
+	/* parse */
 	size_t	npos;
 	size_t	x_neighbor;
 	size_t	y_neighbor;
