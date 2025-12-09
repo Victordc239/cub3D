@@ -6,14 +6,14 @@
 #    By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/26 13:49:21 by vdiez-cu          #+#    #+#              #
-#    Updated: 2025/12/02 17:41:09 by sofernan         ###   ########.fr        #
+#    Updated: 2025/12/09 17:28:15 by sofernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		= cub3D
 
-SRCS		= main.c 1.c 2.c 3.c 4.c 5.c 6.c 7.c 8.c 9.c 10.c \
-			  11.c 12.c
+SRCS		= main.c parse_header.c parse_header_order.c 3.c 4.c 5.c 6.c 7.c 8.c 9.c 10.c \
+			  11.c 12.c 13.c 14.c
 
 LIBFT = libft
 LIBFT_DIR = libft/

@@ -5,107 +5,80 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/02 16:41:06 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/02 17:46:01 by sofernan         ###   ########.fr       */
+/*   Created: 2025/12/09 14:39:46 by sofernan          #+#    #+#             */
+/*   Updated: 2025/12/09 17:15:11 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-void	strip_nl(char *s)
+int	process_neighbor(t_game *g, char *visited, int *queue, size_t *tail)
 {
-	size_t	len;
+	int	ny;
+	int	nx;
 
-	if (!s)
-		return ;
-	len = ft_strlen(s);
-	if (len > 0 && s[len - 1] == '\n')
-		s[len - 1] = '\0';
-}
-
-int	grow_lines(char ***lines, size_t *cap, size_t count, char *line)
-{
-	size_t	newcap;
-	char	**tmp;
-	size_t	i;
-
-	newcap = (*cap) * 2;
-	tmp = malloc(sizeof(char *) * newcap);
-	if (!tmp)
+	ny = (int)(g->npos / g->map_width);
+	nx = (int)(g->npos % g->map_width);
+	if (visited[g->npos])
+		return (0);
+	visited[g->npos] = 1;
+	if (g->map[ny][nx] == ' ')
+		return (write(2, "Error\nMap not closed\n", 21), -1);
+	if (g->map[ny][nx] != '1')
 	{
-		free(line);
-		while (count--)
-			free((*lines)[count]);
-		free(*lines);
-		perror("Error\nMalloc\n");
-		return (-1);
+		queue[(*tail)++] = (int)g->npos;
 	}
-	i = 0;
-	while (i < count)
-	{
-		tmp[i] = (*lines)[i];
-		i++;
-	}
-	free(*lines);
-	*lines = tmp;
-	*cap = newcap;
 	return (0);
 }
 
-int	build_map_from_lines(t_game *g, char **lines, size_t count)
+int	process_neighbors_of(t_game *g, char *visited, int *queue, size_t *tail)
 {
-	size_t	i;
-
-	g->map_height = (int)count;
-	g->map = malloc(sizeof(char *) * (g->map_height + 1));
-	if (!g->map)
+	if ((g->y_neighbor + 1) < (size_t)g->map_height)
 	{
-		while (count--)
-			free(lines[count]);
-		free(lines);
-		perror("Error\nMalloc\n");
-		return (-1);
+		g->npos = (g->y_neighbor + 1) * g->map_width + g->x_neighbor;
+		if (process_neighbor(g, visited, queue, tail) < 0)
+			return (-1);
 	}
-	i = 0;
-	g->y = 0;
-	g->map_width = 0;
-	while (i < count)
+	if (g->y_neighbor > 0)
 	{
-		strip_nl(lines[i]);
-		g->map[g->y++] = lines[i];
-		if ((int)ft_strlen(lines[i]) > g->map_width)
-			g->map_width = ft_strlen(lines[i]);
-		i++;
+		g->npos = (g->y_neighbor - 1) * g->map_width + g->x_neighbor;
+		if (process_neighbor(g, visited, queue, tail) < 0)
+			return (-1);
 	}
-	g->map[g->y] = NULL;
-	return (free(lines), 0);
+	if ((g->x_neighbor + 1) < (size_t)g->map_width)
+	{
+		g->npos = g->y_neighbor * g->map_width + (g->x_neighbor + 1);
+		if (process_neighbor(g, visited, queue, tail) < 0)
+			return (-1);
+	}
+	if (g->x_neighbor > 0)
+	{
+		g->npos = g->y_neighbor * g->map_width + (g->x_neighbor - 1);
+		if (process_neighbor(g, visited, queue, tail) < 0)
+			return (-1);
+	}
+	return (0);
 }
 
-int	parse_map(int fd, char *first_line, t_game *g)
+int	bfs_from_start(t_game *g, char *visited, int *queue, size_t start)
 {
-	char	**lines;
-	char	*line;
-	size_t	cap;
-	size_t	count;
+	long	pos;
+	size_t	head;
+	size_t	tail;
 
-	if (!first_line || !g)
-		return (perror("Error\nStruct\n"), -1);
-	cap = 64;
-	lines = malloc(sizeof(char *) * cap);
-	if (!lines)
-		return (free(first_line), perror("Error\nMalloc\n"), -1);
-	count = 0;
-	lines[count++] = first_line;
-	line = get_next_line(fd);
-	while (line != NULL)
+	tail = 0;
+	head = 0;
+	visited[start] = 1;
+	queue[tail++] = (int)start;
+	while (head < tail)
 	{
-		if (count >= cap)
-			if (grow_lines(&lines, &cap, count, line) < 0)
-				return (-1);
-		lines[count++] = line;
-		line = get_next_line(fd);
+		pos = queue[head++];
+		g->y_neighbor = (int)(pos / (long)g->map_width);
+		g->x_neighbor = (int)(pos % (long)g->map_width);
+		if (g->map[g->y_neighbor][g->x_neighbor] == ' ')
+			return (write(2, "Error\nMap not closed\n", 21), -1);
+		if (process_neighbors_of(g, visited, queue, &tail) < 0)
+			return (-1);
 	}
-	if (build_map_from_lines(g, lines, count) < 0)
-		return (-1);
 	return (0);
 }

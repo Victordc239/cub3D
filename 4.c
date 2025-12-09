@@ -1,105 +1,81 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   4.c                                                :+:      :+:    :+:   */
+/*   7.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/02 16:51:47 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/09 17:00:18 by vdiez-cu         ###   ########.fr       */
+/*   Created: 2025/12/02 16:53:40 by sofernan          #+#    #+#             */
+/*   Updated: 2025/12/02 16:54:05 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	is_blank_line(const char *s)
+void	move_forward_backward(t_game *g, double move_speed, int direction)
 {
-	if (!s)
-		return (1);
-	while (*s)
-	{
-		if (*s != ' ' && *s != '\t' && *s != '\r' && *s != '\n')
-			return (0);
-		s++;
-	}
-	return (1);
+	double	nx;
+	double	ny;
+
+	nx = g->posx + g->dirx * move_speed * direction;
+	ny = g->posy + g->diry * move_speed * direction;
+	if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0
+		&& (int)g->posx < g->map_width && g->map[(int)ny][(int)g->posx] != '1'
+		&& g->map[(int)ny][(int)g->posx] != ' ')
+		g->posy = ny;
+	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0
+		&& nx < g->map_width && g->map[(int)g->posy][(int)nx] != '1'
+		&& g->map[(int)g->posy][(int)nx] != ' ')
+		g->posx = nx;
 }
 
-int	is_header_line(const char *line)
+void	move_left_right(t_game *g, double move_speed, int direction)
 {
-	while (*line == ' ' || *line == '\t')
-		line++;
-	if (ft_strncmp(line, "NO", 2) == 0 && (line[2] == ' ' || line[2] == '\t'))
-		return (1);
-	if (ft_strncmp(line, "SO", 2) == 0 && (line[2] == ' ' || line[2] == '\t'))
-		return (1);
-	if (ft_strncmp(line, "WE", 2) == 0 && (line[2] == ' ' || line[2] == '\t'))
-		return (1);
-	if (ft_strncmp(line, "EA", 2) == 0 && (line[2] == ' ' || line[2] == '\t'))
-		return (1);
-	if (line[0] == 'F' && (line[1] == ' ' || line[1] == '\t'))
-		return (1);
-	if (line[0] == 'C' && (line[1] == ' ' || line[1] == '\t'))
-		return (1);
-	return (0);
+	double	nx;
+	double	ny;
+
+	nx = g->posx + g->planex * move_speed * direction;
+	ny = g->posy + g->planey * move_speed * direction;
+	if (ny >= 0 && ny < g->map_height && (int)g->posx < g->map_width
+		&& (int)g->posx >= 0 && g->map[(int)ny][(int)g->posx] != '1'
+		&& g->map[(int)ny][(int)g->posx] != ' ')
+		g->posy = ny;
+	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0
+		&& nx < g->map_width && g->map[(int)g->posy][(int)nx] != '1'
+		&& g->map[(int)g->posy][(int)nx] != ' ')
+		g->posx = nx;
 }
 
-int	consume_headers_until_map_or_eof(int fd, t_game *g,
-		char **out_first_map_line, int order[6])
+void	rotate_player(t_game *g, double angle)
 {
-	char	*line;
+	double	old_dir_x;
+	double	old_plane_x;
 
-	line = get_next_line(fd);
-	while (line != NULL)
-	{
-		if (is_blank_line(line))
-		{
-			free(line);
-			line = get_next_line(fd);
-			continue ;
-		}
-		if (is_header_line(line))
-		{
-			if (parse_one_header_ordered(line, g, order) < 0)
-				return (free(line), -1);
-			free(line);
-			line = get_next_line(fd);
-			continue ;
-		}
-		if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea
-			|| !g->has_f || !g->has_c)
-			return (free(line), -1);
-		return (*out_first_map_line = line, 0);
-	}
-	return (1);
+	old_dir_x = g->dirx;
+	g->dirx = g->dirx * cos(angle) - g->diry * sin(angle);
+	g->diry = old_dir_x * sin(angle) + g->diry * cos(angle);
+	old_plane_x = g->planex;
+	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
+	g->planey = old_plane_x * sin(angle) + g->planey * cos(angle);
 }
 
-int	parse_headers_loop(int fd, t_game *g, char **out_first_map_line,
-		int order[6])
+void	update_player(t_game *g, double delta)
 {
-	int	result;
+	double	move_speed;
+	double	rot_speed;
 
-	result = consume_headers_until_map_or_eof(fd, g, out_first_map_line, order);
-	if (result == -1)
-		return (-1);
-	if (result == 0)
-		return (0);
-	if (!g->has_no || !g->has_so || !g->has_we || !g->has_ea || !g->has_f
-		|| !g->has_c)
-		return (-1);
-	return (0);
-}
-
-int	parse_headers(int fd, t_game *g, char **out_first_map_line)
-{
-	int	order[6];
-	int	i;
-
-	i = 0;
-	while (i < 6)
-		order[i++] = 0;
-	if (!g || !out_first_map_line)
-		return (-1);
-	*out_first_map_line = NULL;
-	return (parse_headers_loop(fd, g, out_first_map_line, order));
+	move_speed = 3.0 * delta;
+	rot_speed = 2.0 * delta;
+	if (g->key_w)
+		move_forward_backward(g, move_speed, +1);
+	if (g->key_s)
+		move_forward_backward(g, move_speed, -1);
+	if (g->key_a)
+		move_left_right(g, move_speed, -1);
+	if (g->key_d)
+		move_left_right(g, move_speed, +1);
+	if (g->key_left)
+		rotate_player(g, -rot_speed);
+	if (g->key_right)
+		rotate_player(g, rot_speed);
 }

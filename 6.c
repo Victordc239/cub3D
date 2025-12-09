@@ -1,65 +1,136 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   8.c                                                :+:      :+:    :+:   */
+/*   7.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/02 16:54:58 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/02 16:55:29 by sofernan         ###   ########.fr       */
+/*   Created: 2025/12/02 16:55:45 by sofernan          #+#    #+#             */
+/*   Updated: 2025/12/02 17:38:30 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+//render_frame 
+
 #include "cub3d.h"
 
-int	get_tex_pixel(t_texture *texture, int x, int y)
+void	init_render_vars(t_game *g, t_render *r, int x)
 {
-	char	*px;
-
-	if (x < 0 || x >= texture->width || y < 0 || y >= texture->height)
-		return (0);
-	px = texture->addr + (y * texture->line_len_byte + x
-			* (texture->bit_by_pixel / 8));
-	return (*(unsigned int *)px);
+	r->x = x;
+	r->camera_x = 2.0 * x / (double)g->screen_w - 1.0;
+	r->ray_dir_x = g->dirx + g->planex * r->camera_x;
+	r->ray_dir_y = g->diry + g->planey * r->camera_x;
+	r->map_x = (int)g->posx;
+	r->map_y = (int)g->posy;
+	if (r->ray_dir_x == 0.0)
+		r->delta_dist_x = 1e30;
+	else
+		r->delta_dist_x = fabs(1.0 / r->ray_dir_x);
+	if (r->ray_dir_y == 0.0)
+		r->delta_dist_y = 1e30;
+	else
+		r->delta_dist_y = fabs(1.0 / r->ray_dir_y);
+	r->hit = 0;
+	r->side = 0;
 }
 
-void	put_pixel_frame(t_game *g, int x, int y, unsigned int color)
+void	init_steps(t_game *g, t_render *r)
 {
-	char	*dst;
-
-	if (!g || !g->frame_addr)
-		return ;
-	if (x < 0 || x >= g->screen_w || y < 0 || y >= g->screen_h)
-		return ;
-	dst = g->frame_addr + y * g->frame_line_len + x * (g->frame_bpp / 8);
-	*(unsigned int *)dst = color;
-}
-
-void	render_column(t_game *g, t_render *r, t_texture *tex)
-{
-	r->tex_x = (int)(r->wall_x * (double)r->tex_width);
-	if ((r->side == 0 && r->ray_dir_x > 0)
-		|| (r->side == 1 && r->ray_dir_y < 0))
-		r->tex_x = r->tex_width - r->tex_x - 1;
-	if (r->tex_x < 0)
-		r->tex_x = 0;
-	if (r->tex_x >= r->tex_width)
-		r->tex_x = r->tex_width - 1;
-	r->step = 1.0 * r->tex_height / (double)r->line_height;
-	r->tex_pos = (r->draw_start - g->screen_h / 2 + r->line_height / 2)
-		* r->step;
-	while (r->draw_start <= r->draw_end)
+	if (r->ray_dir_x < 0)
 	{
-		r->tex_y = (int)r->tex_pos;
-		if (r->tex_y < 0)
-			r->tex_y = 0;
-		if (r->tex_y >= r->tex_height)
-			r->tex_y = r->tex_height - 1;
-		r->tex_pos += r->step;
-		r->color = get_tex_pixel(tex, r->tex_x, r->tex_y);
-		if (r->side == 1)
-			r->color = ((r->color & 0xFEFEFE) >> 1);
-		put_pixel_frame(g, r->x, r->draw_start, r->color);
-		r->draw_start++;
+		r->step_x = -1;
+		r->side_dist_x = (g->posx - r->map_x) * r->delta_dist_x;
+	}
+	else
+	{
+		r->step_x = 1;
+		r->side_dist_x = (r->map_x + 1.0 - g->posx) * r->delta_dist_x;
+	}
+	if (r->ray_dir_y < 0)
+	{
+		r->step_y = -1;
+		r->side_dist_y = (g->posy - r->map_y) * r->delta_dist_y;
+	}
+	else
+	{
+		r->step_y = 1;
+		r->side_dist_y = (r->map_y + 1.0 - g->posy) * r->delta_dist_y;
+	}
+}
+
+void	perform_dda(t_game *g, t_render *r)
+{
+	while (!r->hit)
+	{
+		if (r->side_dist_x < r->side_dist_y)
+		{
+			r->side_dist_x += r->delta_dist_x;
+			r->map_x += r->step_x;
+			r->side = 0;
+		}
+		else
+		{
+			r->side_dist_y += r->delta_dist_y;
+			r->map_y += r->step_y;
+			r->side = 1;
+		}
+		if (r->map_y < 0 || r->map_y >= g->map_height
+			|| r->map_x < 0 || r->map_x >= g->map_width)
+		{
+			r->hit = 1;
+			break ;
+		}
+		r->mch = g->map[r->map_y][r->map_x];
+		if (r->mch == '1' || r->mch == ' ')
+			r->hit = 1;
+	}
+}
+
+void	compute_projection(t_game *g, t_render *r)
+{
+	if (r->side == 0)
+	{
+		if (r->ray_dir_x == 0)
+			r->denom = 1e-6;
+		else
+			r->denom = r->ray_dir_x;
+		r->wall_dist = (r->map_x - g->posx + (1 - r->step_x) / 2.0) / r->denom;
+	}
+	else
+	{
+		if (r->ray_dir_y == 0)
+			r->denom = 1e-6;
+		else
+			r->denom = r->ray_dir_y;
+		r->wall_dist = (r->map_y - g->posy + (1 - r->step_y) / 2.0) / r->denom;
+	}
+	if (r->wall_dist <= 0.0)
+		r->wall_dist = 1e-6;
+	r->line_height = (int)(g->screen_h / r->wall_dist);
+	r->draw_start = -r->line_height / 2 + g->screen_h / 2;
+	if (r->draw_start < 0)
+		r->draw_start = 0;
+	r->draw_end = r->line_height / 2 + g->screen_h / 2;
+	if (r->draw_end >= g->screen_h)
+		r->draw_end = g->screen_h - 1;
+}
+
+t_texture	*choose_wall_texture(t_game *g, t_render *r)
+{
+	if (!g || !r)
+		return (NULL);
+	if (r->side == 0)
+	{
+		if (r->ray_dir_x > 0)
+			return (&g->texture_we);
+		else
+			return (&g->texture_ea);
+	}
+	else
+	{
+		if (r->ray_dir_y > 0)
+			return (&g->texture_no);
+		else
+			return (&g->texture_so);
 	}
 }

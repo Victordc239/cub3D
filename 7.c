@@ -1,136 +1,117 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   7.c                                                :+:      :+:    :+:   */
+/*   8.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/02 16:55:45 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/02 17:38:30 by sofernan         ###   ########.fr       */
+/*   Created: 2025/12/02 16:57:02 by sofernan          #+#    #+#             */
+/*   Updated: 2025/12/02 17:38:37 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//render_frame 
-
 #include "cub3d.h"
 
-void	init_render_vars(t_game *g, t_render *r, int x)
+double	get_time_s(void)
 {
-	r->x = x;
-	r->camera_x = 2.0 * x / (double)g->screen_w - 1.0;
-	r->ray_dir_x = g->dirx + g->planex * r->camera_x;
-	r->ray_dir_y = g->diry + g->planey * r->camera_x;
-	r->map_x = (int)g->posx;
-	r->map_y = (int)g->posy;
-	if (r->ray_dir_x == 0.0)
-		r->delta_dist_x = 1e30;
-	else
-		r->delta_dist_x = fabs(1.0 / r->ray_dir_x);
-	if (r->ray_dir_y == 0.0)
-		r->delta_dist_y = 1e30;
-	else
-		r->delta_dist_y = fabs(1.0 / r->ray_dir_y);
-	r->hit = 0;
-	r->side = 0;
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec + tv.tv_usec / 1000000.0);
 }
 
-void	init_steps(t_game *g, t_render *r)
+int	create_frame(t_game *g)
 {
-	if (r->ray_dir_x < 0)
-	{
-		r->step_x = -1;
-		r->side_dist_x = (g->posx - r->map_x) * r->delta_dist_x;
-	}
-	else
-	{
-		r->step_x = 1;
-		r->side_dist_x = (r->map_x + 1.0 - g->posx) * r->delta_dist_x;
-	}
-	if (r->ray_dir_y < 0)
-	{
-		r->step_y = -1;
-		r->side_dist_y = (g->posy - r->map_y) * r->delta_dist_y;
-	}
-	else
-	{
-		r->step_y = 1;
-		r->side_dist_y = (r->map_y + 1.0 - g->posy) * r->delta_dist_y;
-	}
+	if (g->frame_img)
+		mlx_destroy_image(g->mlx, g->frame_img);
+	g->frame_img = mlx_new_image(g->mlx, g->screen_w, g->screen_h);
+	if (!g->frame_img)
+		return (write(2, "Error\nMalloc frame\n", 19), -1);
+	g->frame_addr = mlx_get_data_addr(g->frame_img,
+			&g->frame_bpp, &g->frame_line_len, &g->frame_endian);
+	return (0);
 }
 
-void	perform_dda(t_game *g, t_render *r)
+void	draw_background_to_frame(t_game *g)
 {
-	while (!r->hit)
+	int				x;
+	int				y;
+	unsigned int	color_c;
+	unsigned int	color_f;
+
+	if (!g || !g->frame_img || !g->frame_addr)
+		return ;
+	color_c = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
+	color_f = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
+	y = 0;
+	while (y < g->screen_h)
 	{
-		if (r->side_dist_x < r->side_dist_y)
+		x = 0;
+		while (x < g->screen_w)
 		{
-			r->side_dist_x += r->delta_dist_x;
-			r->map_x += r->step_x;
-			r->side = 0;
+			if (y < g->screen_h / 2)
+				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
+						+ x * (g->frame_bpp / 8)) = color_c;
+			else
+				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
+						+ x * (g->frame_bpp / 8)) = color_f;
+			x++;
 		}
-		else
-		{
-			r->side_dist_y += r->delta_dist_y;
-			r->map_y += r->step_y;
-			r->side = 1;
-		}
-		if (r->map_y < 0 || r->map_y >= g->map_height
-			|| r->map_x < 0 || r->map_x >= g->map_width)
-		{
-			r->hit = 1;
-			break ;
-		}
-		r->mch = g->map[r->map_y][r->map_x];
-		if (r->mch == '1' || r->mch == ' ')
-			r->hit = 1;
+		y++;
 	}
 }
 
-void	compute_projection(t_game *g, t_render *r)
+void	render_frame(t_game *g, t_render *r, t_texture **tex)
 {
-	if (r->side == 0)
+	if (!g || !g->frame_img || !g->frame_addr)
+		return ;
+	r->x = 0;
+	while (r->x < g->screen_w)
 	{
-		if (r->ray_dir_x == 0)
-			r->denom = 1e-6;
+		init_render_vars(g, r, r->x);
+		init_steps(g, r);
+		perform_dda(g, r);
+		compute_projection(g, r);
+		if (r->side == 0)
+			r->wall_x = g->posy + r->wall_dist * r->ray_dir_y;
 		else
-			r->denom = r->ray_dir_x;
-		r->wall_dist = (r->map_x - g->posx + (1 - r->step_x) / 2.0) / r->denom;
+			r->wall_x = g->posx + r->wall_dist * r->ray_dir_x;
+		r->wall_x -= floor(r->wall_x);
+		*tex = choose_wall_texture(g, r);
+		if (!(*tex) || !(*tex)->addr || (*tex)->width <= 0)
+		{
+			r->x++;
+			continue ;
+		}
+		r->tex_width = (*tex)->width;
+		r->tex_height = (*tex)->height;
+		render_column(g, r, *tex);
+		r->x++;
 	}
-	else
-	{
-		if (r->ray_dir_y == 0)
-			r->denom = 1e-6;
-		else
-			r->denom = r->ray_dir_y;
-		r->wall_dist = (r->map_y - g->posy + (1 - r->step_y) / 2.0) / r->denom;
-	}
-	if (r->wall_dist <= 0.0)
-		r->wall_dist = 1e-6;
-	r->line_height = (int)(g->screen_h / r->wall_dist);
-	r->draw_start = -r->line_height / 2 + g->screen_h / 2;
-	if (r->draw_start < 0)
-		r->draw_start = 0;
-	r->draw_end = r->line_height / 2 + g->screen_h / 2;
-	if (r->draw_end >= g->screen_h)
-		r->draw_end = g->screen_h - 1;
 }
 
-t_texture	*choose_wall_texture(t_game *g, t_render *r)
+int	game_loop(void *param)
 {
-	if (!g || !r)
-		return (NULL);
-	if (r->side == 0)
-	{
-		if (r->ray_dir_x > 0)
-			return (&g->texture_we);
-		else
-			return (&g->texture_ea);
-	}
-	else
-	{
-		if (r->ray_dir_y > 0)
-			return (&g->texture_no);
-		else
-			return (&g->texture_so);
-	}
+	static double	last;
+	double			delta;
+	t_game			*g;
+	t_render		r;
+	t_texture		*tex;
+
+	g = (t_game *)param;
+	g->now = get_time_s();
+	if (!last)
+		last = g->now;
+	delta = g->now - last;
+	if (delta > 0.25)
+		delta = 0.25;
+	last = g->now;
+	update_player(g, delta);
+	if (!g->frame_img)
+		if (create_frame(g) < 0)
+			return (write(2, "Error\ncreate_frame failed\n", 26), 1);
+	draw_background_to_frame(g);
+	render_frame(g, &r, &tex);
+	mlx_put_image_to_window(g->mlx, g->window, g->frame_img, 0, 0);
+	return (0);
 }

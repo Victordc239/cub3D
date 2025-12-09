@@ -1,108 +1,132 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   10.c                                               :+:      :+:    :+:   */
+/*   12.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/02 16:40:34 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/09 14:40:17 by sofernan         ###   ########.fr       */
+/*   Created: 2025/12/02 17:04:35 by sofernan          #+#    #+#             */
+/*   Updated: 2025/12/02 17:40:32 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	find_player_pos(t_game *g, int *out_py, int *out_px)
+int	check_empty_lines_in_map(t_game *g)
 {
-	size_t	i;
-	size_t	j;
+	int	y;
+	int	in_map;
 
-	if (!g || !g->map || !out_py || !out_px)
+	if (!g || !g->map)
 		return (-1);
-	*out_py = -1;
-	*out_px = -1;
-	i = 0;
-	while (i < (size_t)g->map_height)
+	in_map = 0;
+	y = 0;
+	while (y < g->map_height)
 	{
-		j = 0;
-		while (j < (size_t)ft_strlen(g->map[i]))
+		if (!is_blank_line(g->map[y]))
+			in_map = 1;
+		else if (in_map)
 		{
-			if (g->map[i][j] == 'N' || g->map[i][j] == 'S'
-				|| g->map[i][j] == 'E' || g->map[i][j] == 'W')
-			{
-				*out_py = (int)i;
-				*out_px = (int)j;
-				return (0);
-			}
-			++j;
+			write(2, "Error\nEmpty line in map\n", 25);
+			return (-1);
 		}
-		++i;
-	}
-	return (-1);
-}
-
-int	allocate_visited_and_queue(long long total, char **visited_out,
-						int **queue_out)
-{
-	*visited_out = NULL;
-	*queue_out = NULL;
-	if (total <= 0)
-		return (-1);
-	*visited_out = ft_calloc((size_t)total, 1);
-	if (!*visited_out)
-		return (perror("Error\nMalloc\n"), -1);
-	*queue_out = malloc(sizeof(int) * (size_t)total);
-	if (!*queue_out)
-		return (free(*visited_out), perror("Error\nMalloc\n"), -1);
-	return (0);
-}
-
-int	check_all_visited(t_game *g, char *visited, size_t w, size_t h)
-{
-	size_t	i;
-	size_t	j;
-
-	i = 0;
-	while (i < h)
-	{
-		j = 0;
-		while (j < w)
-		{
-			if (check_char(g->map[i][j], 1))
-			{
-				if (!visited[i * w + j])
-					return (write(2, "Error\nArea\n", 11), -1);
-			}
-			++j;
-		}
-		++i;
+		y++;
 	}
 	return (0);
 }
 
-int	check_map_closed(t_game *g)
+int	pad_map(t_game *g, int y)
 {
-	long long	total;
-	char		*visited;
-	int			*queue;
-	int			px;
-	int			py;
+	int		len;
+	int		i;
+	char	*newrow;
 
-	visited = NULL;
-	queue = NULL;
 	if (!g || !g->map)
 		return (write(2, "Error\nStruct\n", 13), -1);
-	if (g->map_height == 0 || g->map_width == 0)
-		return (write(2, "Error\nInvalid map size\n", 22), -1);
-	if (find_player_pos(g, &py, &px) < 0)
-		return (write(2, "Error\nPlayer not found\n", 23), -1);
-	total = (long long)g->map_height * (long long)g->map_width;
-	if (allocate_visited_and_queue(total, &visited, &queue) < 0)
+	y = -1;
+	while (++y < g->map_height)
+	{
+		len = ft_strlen(g->map[y]);
+		if (len < g->map_width)
+		{
+			newrow = malloc(g->map_width + 1);
+			if (!newrow)
+				return (write(2, "Error\nMalloc\n", 13), -1);
+			i = -1;
+			while (++i < len)
+				newrow[i] = g->map[y][i];
+			while (i < g->map_width)
+				newrow[i++] = ' ';
+			newrow[i] = '\0';
+			(free(g->map[y]), g->map[y] = newrow);
+		}
+	}
+	return (0);
+}
+
+int	check_char(char c, int flag_walkable)
+{
+	if (flag_walkable == 1)
+		return (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W');
+	else
+		return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E'
+			|| c == 'W' || c == ' ');
+}
+
+int	validate_map_chars(t_game *g)
+{
+	int	y;
+	int	x;
+	int	player_count;
+
+	if (!g || !g->map)
 		return (-1);
-	if (bfs_from_start(g, visited, queue,
-			((size_t)py * g->map_width + (size_t)px)) < 0)
-		return (free(queue), free(visited), -1);
-	if (check_all_visited(g, visited, g->map_width, g->map_height) < 0)
-		return (free(queue), free(visited), -1);
-	return (free(queue), free(visited), 0);
+	player_count = 0;
+	y = 0;
+	while (g->map[y])
+	{
+		x = 0;
+		while (g->map[y][x])
+		{
+			if (!check_char(g->map[y][x], 0))
+				return (write(2, "Error\nInvalid character in map\n", 31), -1);
+			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
+				|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
+				player_count++;
+			x++;
+		}
+		y++;
+	}
+	if (player_count != 1)
+		return (write(2, "Error\nInvalid player count\n", 27), -1);
+	return (0);
+}
+
+int	find_player(t_game *g, char *out_orient)
+{
+	int	y;
+	int	x;
+
+	if (!g || !g->map || !out_orient)
+		return (write(2, "Error\nStruct\n", 13), -1);
+	y = 0;
+	while (y < g->map_height)
+	{
+		x = 0;
+		while (g->map[y][x])
+		{
+			if (g->map[y][x] == 'N' || g->map[y][x] == 'S'
+			|| g->map[y][x] == 'E' || g->map[y][x] == 'W')
+			{
+				g->init_player_y = y;
+				g->init_player_x = x;
+				*out_orient = g->map[y][x];
+				g->map[y][x] = '0';
+				return (0);
+			}
+			x++;
+		}
+		y++;
+	}
+	return (write(2, "Error\nPlayer not found\n", 23), -1);
 }

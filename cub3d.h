@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/09 17:11:52 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/09 17:49:03 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,7 @@ int			parse_map(int fd, char *first_line, t_game *g);
 int			is_blank_line(const char *s);
 int			parse_uint0_255(const char **p, int *out);
 int			parse_color_value(const char *rest, int out_rgb[3]);
-int			set_texture(char **dst, const char *rest);
+int			parse_texture_path(char **dest, const char *rest);
 int			is_header_line(const char *line);
 int			parse_headers(int fd, t_game *g, char **out_first_map_line);
 int			mouse_move(int x, int y, void *param);
@@ -183,13 +183,13 @@ int			game_loop(void *param);
 int			parse(char **argv, t_game *g, char *orient);
 int			check_file_empty(const char *path);
 int			check_empty_lines_in_map(t_game *g);
-int			parse_one_header_ordered(const char *line, t_game *g, int *order);
+int			parse_header_order(const char *line, t_game *g, int *order);
 int			build_map_from_lines(t_game *g, char **lines, size_t count);
 int			grow_lines(char ***lines, size_t *cap, size_t count, char *line);
 int			check_all_visited(t_game *g, char *visited, size_t w, size_t h);
 int			bfs_from_start(t_game *g, char *visited, int *queue, size_t start);
 int			find_player_pos(t_game *g, int *out_py, int *out_px);
-int			apply_header_action(int idx, t_game *g, char *trim);
+int			process_header(int id, t_game *g, char *trim);
 int			process_neighbor(t_game *g, char *visited, int *queue,
 				size_t *tail);
 int			find_player_in_copy(char **copy, int map_height, int *out_y,

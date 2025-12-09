@@ -1,117 +1,111 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   8.c                                                :+:      :+:    :+:   */
+/*   9.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/02 16:57:02 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/02 17:38:37 by sofernan         ###   ########.fr       */
+/*   Created: 2025/12/02 16:41:06 by sofernan          #+#    #+#             */
+/*   Updated: 2025/12/02 17:46:01 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-double	get_time_s(void)
+void	strip_nl(char *s)
 {
-	struct timeval	tv;
+	size_t	len;
 
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec + tv.tv_usec / 1000000.0);
+	if (!s)
+		return ;
+	len = ft_strlen(s);
+	if (len > 0 && s[len - 1] == '\n')
+		s[len - 1] = '\0';
 }
 
-int	create_frame(t_game *g)
+int	grow_lines(char ***lines, size_t *cap, size_t count, char *line)
 {
-	if (g->frame_img)
-		mlx_destroy_image(g->mlx, g->frame_img);
-	g->frame_img = mlx_new_image(g->mlx, g->screen_w, g->screen_h);
-	if (!g->frame_img)
-		return (write(2, "Error\nMalloc frame\n", 19), -1);
-	g->frame_addr = mlx_get_data_addr(g->frame_img,
-			&g->frame_bpp, &g->frame_line_len, &g->frame_endian);
+	size_t	newcap;
+	char	**tmp;
+	size_t	i;
+
+	newcap = (*cap) * 2;
+	tmp = malloc(sizeof(char *) * newcap);
+	if (!tmp)
+	{
+		free(line);
+		while (count--)
+			free((*lines)[count]);
+		free(*lines);
+		perror("Error\nMalloc\n");
+		return (-1);
+	}
+	i = 0;
+	while (i < count)
+	{
+		tmp[i] = (*lines)[i];
+		i++;
+	}
+	free(*lines);
+	*lines = tmp;
+	*cap = newcap;
 	return (0);
 }
 
-void	draw_background_to_frame(t_game *g)
+int	build_map_from_lines(t_game *g, char **lines, size_t count)
 {
-	int				x;
-	int				y;
-	unsigned int	color_c;
-	unsigned int	color_f;
+	size_t	i;
 
-	if (!g || !g->frame_img || !g->frame_addr)
-		return ;
-	color_c = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
-	color_f = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
-	y = 0;
-	while (y < g->screen_h)
+	g->map_height = (int)count;
+	g->map = malloc(sizeof(char *) * (g->map_height + 1));
+	if (!g->map)
 	{
-		x = 0;
-		while (x < g->screen_w)
-		{
-			if (y < g->screen_h / 2)
-				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
-						+ x * (g->frame_bpp / 8)) = color_c;
-			else
-				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
-						+ x * (g->frame_bpp / 8)) = color_f;
-			x++;
-		}
-		y++;
+		while (count--)
+			free(lines[count]);
+		free(lines);
+		perror("Error\nMalloc\n");
+		return (-1);
 	}
+	i = 0;
+	g->y = 0;
+	g->map_width = 0;
+	while (i < count)
+	{
+		strip_nl(lines[i]);
+		g->map[g->y++] = lines[i];
+		if ((int)ft_strlen(lines[i]) > g->map_width)
+			g->map_width = ft_strlen(lines[i]);
+		i++;
+	}
+	g->map[g->y] = NULL;
+	return (free(lines), 0);
 }
 
-void	render_frame(t_game *g, t_render *r, t_texture **tex)
+int	parse_map(int fd, char *first_line, t_game *g)
 {
-	if (!g || !g->frame_img || !g->frame_addr)
-		return ;
-	r->x = 0;
-	while (r->x < g->screen_w)
+	char	**lines;
+	char	*line;
+	size_t	cap;
+	size_t	count;
+
+	if (!first_line || !g)
+		return (perror("Error\nStruct\n"), -1);
+	cap = 64;
+	lines = malloc(sizeof(char *) * cap);
+	if (!lines)
+		return (free(first_line), perror("Error\nMalloc\n"), -1);
+	count = 0;
+	lines[count++] = first_line;
+	line = get_next_line(fd);
+	while (line != NULL)
 	{
-		init_render_vars(g, r, r->x);
-		init_steps(g, r);
-		perform_dda(g, r);
-		compute_projection(g, r);
-		if (r->side == 0)
-			r->wall_x = g->posy + r->wall_dist * r->ray_dir_y;
-		else
-			r->wall_x = g->posx + r->wall_dist * r->ray_dir_x;
-		r->wall_x -= floor(r->wall_x);
-		*tex = choose_wall_texture(g, r);
-		if (!(*tex) || !(*tex)->addr || (*tex)->width <= 0)
-		{
-			r->x++;
-			continue ;
-		}
-		r->tex_width = (*tex)->width;
-		r->tex_height = (*tex)->height;
-		render_column(g, r, *tex);
-		r->x++;
+		if (count >= cap)
+			if (grow_lines(&lines, &cap, count, line) < 0)
+				return (-1);
+		lines[count++] = line;
+		line = get_next_line(fd);
 	}
-}
-
-int	game_loop(void *param)
-{
-	static double	last;
-	double			delta;
-	t_game			*g;
-	t_render		r;
-	t_texture		*tex;
-
-	g = (t_game *)param;
-	g->now = get_time_s();
-	if (!last)
-		last = g->now;
-	delta = g->now - last;
-	if (delta > 0.25)
-		delta = 0.25;
-	last = g->now;
-	update_player(g, delta);
-	if (!g->frame_img)
-		if (create_frame(g) < 0)
-			return (write(2, "Error\ncreate_frame failed\n", 26), 1);
-	draw_background_to_frame(g);
-	render_frame(g, &r, &tex);
-	mlx_put_image_to_window(g->mlx, g->window, g->frame_img, 0, 0);
+	if (build_map_from_lines(g, lines, count) < 0)
+		return (-1);
 	return (0);
 }
