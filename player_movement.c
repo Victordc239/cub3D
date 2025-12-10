@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:53:40 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 17:13:35 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/10 18:32:35 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,9 @@ void	update_player(t_game *g, double delta)
 	move_speed = 3.0 * delta;
 	rot_speed = 2.0 * delta;
 	if (g->key_w)
-		move_forward_backward(g, move_speed, +1);
+		move_forward_back(g, move_speed, +1);
 	if (g->key_s)
-		move_forward_backward(g, move_speed, -1);
+		move_forward_back(g, move_speed, -1);
 	if (g->key_a)
 		move_left_right(g, move_speed, -1);
 	if (g->key_d)
