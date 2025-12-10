@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   main(3).c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/10 15:57:02 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/09 16:21:11 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ int	main(int argc, char **argv)
 	mlx_hook(g.window, 2, 1, key_press, &g);
 	mlx_hook(g.window, 3, 2, key_release, &g);
 	mlx_hook(g.window, 17, 0, handle_close, &g);
+	mlx_hook(g.window, 6, 64, mouse_move, &g);
 	(mlx_loop_hook(g.mlx, game_loop, &g), mlx_loop(g.mlx));
 	return (free_map(&g), free_config(&g), 0);
 }

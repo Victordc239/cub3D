@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   13.c                                               :+:      :+:    :+:   */
+/*   14(4).c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:47:03 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 15:57:31 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/09 16:20:13 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,4 +80,33 @@ int	key_release(int keycode, void *param)
 	else if (keycode == 65363)
 		g->key_right = 0;
 	return (0);
+}
+
+int	mouse_move(int x, int y, void *param)
+{
+	t_game	*g;
+	int		dx;
+	double	angle;
+	double	old_dir_x;
+	double	old_plane_x;
+
+	g = (t_game *)param;
+	if (!g)
+		return (0);
+	dx = x - g->mouse_last_x;
+	g->mouse_last_x = x;
+	g->mouse_last_y = y;
+	if (dx > -2 && dx < 2)
+		return (0);
+	if (dx > 50)
+		dx = 50;
+	if (dx < -50)
+		dx = -50;
+	angle = dx * 0.003;
+	old_dir_x = g->dirx;
+	g->dirx = g->dirx * cos(angle) - g->diry * sin(angle);
+	g->diry = old_dir_x * sin(angle) + g->diry * cos(angle);
+	old_plane_x = g->planex;
+	g->planex = g->planex * cos(angle) - g->planey * sin(angle);
+	return (g->planey = old_plane_x * sin(angle) + g->planey * cos(angle), 0);
 }

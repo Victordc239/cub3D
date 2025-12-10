@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   4.c                                                :+:      :+:    :+:   */
+/*   7.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:53:40 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 16:16:02 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/02 16:54:05 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,36 @@
 
 void	move_forward_backward(t_game *g, double move_speed, int direction)
 {
-	g->posx = g->posx + g->dirx * move_speed * direction;
-	g->posy = g->posy + g->diry * move_speed * direction;
+	double	nx;
+	double	ny;
+
+	nx = g->posx + g->dirx * move_speed * direction;
+	ny = g->posy + g->diry * move_speed * direction;
+	if (ny >= 0 && ny < g->map_height && (int)g->posx >= 0
+		&& (int)g->posx < g->map_width && g->map[(int)ny][(int)g->posx] != '1'
+		&& g->map[(int)ny][(int)g->posx] != ' ')
+		g->posy = ny;
+	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0
+		&& nx < g->map_width && g->map[(int)g->posy][(int)nx] != '1'
+		&& g->map[(int)g->posy][(int)nx] != ' ')
+		g->posx = nx;
 }
 
 void	move_left_right(t_game *g, double move_speed, int direction)
 {
-	g->posx = g->posx + g->planex * move_speed * direction;
-	g->posy = g->posy + g->planey * move_speed * direction;
+	double	nx;
+	double	ny;
+
+	nx = g->posx + g->planex * move_speed * direction;
+	ny = g->posy + g->planey * move_speed * direction;
+	if (ny >= 0 && ny < g->map_height && (int)g->posx < g->map_width
+		&& (int)g->posx >= 0 && g->map[(int)ny][(int)g->posx] != '1'
+		&& g->map[(int)ny][(int)g->posx] != ' ')
+		g->posy = ny;
+	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && nx >= 0
+		&& nx < g->map_width && g->map[(int)g->posy][(int)nx] != '1'
+		&& g->map[(int)g->posy][(int)nx] != ' ')
+		g->posx = nx;
 }
 
 void	rotate_player(t_game *g, double angle)
