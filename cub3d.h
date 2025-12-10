@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/09 17:49:03 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/10 14:48:12 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,10 +164,10 @@ int			flood_fill(t_game *g, char **visited, int y, int x);
 int			check_map_closed(t_game *g);
 int			validate_map_chars(t_game *g);
 int			parse_map(int fd, char *first_line, t_game *g);
-int			is_blank_line(const char *s);
-int			parse_uint0_255(const char **p, int *out);
-int			parse_color_value(const char *rest, int out_rgb[3]);
-int			parse_texture_path(char **dest, const char *rest);
+int			is_empty_line(const char *s);
+int			parse_uint0_255(const char **rgb, int *rgb_number);
+int			parse_color_value(const char *rgb_numbers, int rgb_number[3]);
+int			parse_texture_path(char **dest, const char *textures_path);
 int			is_header_line(const char *line);
 int			parse_headers(int fd, t_game *g, char **out_first_map_line);
 int			mouse_move(int x, int y, void *param);
@@ -189,7 +189,7 @@ int			grow_lines(char ***lines, size_t *cap, size_t count, char *line);
 int			check_all_visited(t_game *g, char *visited, size_t w, size_t h);
 int			bfs_from_start(t_game *g, char *visited, int *queue, size_t start);
 int			find_player_pos(t_game *g, int *out_py, int *out_px);
-int			process_header(int id, t_game *g, char *trim);
+int			process_header(int id, t_game *g, char *header_line);
 int			process_neighbor(t_game *g, char *visited, int *queue,
 				size_t *tail);
 int			find_player_in_copy(char **copy, int map_height, int *out_y,

@@ -6,25 +6,25 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:49:37 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/09 17:49:03 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/10 14:00:04 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	get_header_id(const char *trim)
+int	get_header_id(const char *header_line)
 {
-	if (ft_strncmp(trim, "NO", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+	if (ft_strncmp(header_line, "NO", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (0);
-	if (ft_strncmp(trim, "SO", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+	if (ft_strncmp(header_line, "SO", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (1);
-	if (ft_strncmp(trim, "WE", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+	if (ft_strncmp(header_line, "WE", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (2);
-	if (ft_strncmp(trim, "EA", 2) == 0 && (trim[2] == ' ' || trim[2] == '\t'))
+	if (ft_strncmp(header_line, "EA", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (3);
-	if (trim[0] == 'F' && (trim[1] == ' ' || trim[1] == '\t'))
+	if (header_line[0] == 'F' && (header_line[1] == ' ' || header_line[1] == '\t'))
 		return (4);
-	if (trim[0] == 'C' && (trim[1] == ' ' || trim[1] == '\t'))
+	if (header_line[0] == 'C' && (header_line[1] == ' ' || header_line[1] == '\t'))
 		return (5);
 	return (-1);
 }
@@ -45,21 +45,21 @@ int	check_header_order(int *order, int id)
 
 int	parse_header_order(const char *line, t_game *g, int *order)
 {
-	char	*trim;
+	char	*header_line;
 	int		id;
 
 	if (!line || !g || !order)
 		return (-1);
-	trim = ft_strtrim(line, " \t\n\r");
-	if (!trim)
+	header_line = ft_strtrim(line, " \t\n\r");
+	if (!header_line)
 		return (-1);
-	id = get_header_id(trim);
+	id = get_header_id(header_line);
 	if (id == -1)
-		return (free(trim), -1);
+		return (free(header_line), -1);
 	if (check_header_order(order, id) < 0)
-		return (free(trim), -1);
-	if (process_header(id, g, trim) < 0)
-		return (free(trim), -1);
+		return (free(header_line), -1);
+	if (process_header(id, g, header_line) < 0)
+		return (free(header_line), -1);
 	order[id] = 1;
-	return (free(trim), 0);
+	return (free(header_line), 0);
 }

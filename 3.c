@@ -6,13 +6,13 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:51:47 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/09 17:49:03 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/10 14:48:12 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	is_blank_line(const char *s)
+int	is_empty_line(const char *s)
 {
 	if (!s)
 		return (1);
@@ -51,7 +51,7 @@ int	consume_headers_until_map_or_eof(int fd, t_game *g, char **out_first_map_lin
 	line = get_next_line(fd);
 	while (line != NULL)
 	{
-		if (is_blank_line(line))
+		if (is_empty_line(line))
 		{
 			free(line);
 			line = get_next_line(fd);
