@@ -3,19 +3,19 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+         #
+#    By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/26 13:49:21 by vdiez-cu          #+#    #+#              #
-#    Updated: 2025/12/10 16:17:39 by vdiez-cu         ###   ########.fr        #
+#    Updated: 2025/12/10 18:29:14 by sofernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		= cub3D
 
-SRCS		= main.c parse_header.c parse_header_order.c 3.c 4.c 5.c 6.c 7.c 8.c 9.c 10.c \
+SRCS		= main.c parse_header.c parse_header_order.c parse_headers.c player_movement.c render_column.c raycasting.c render_loop.c 8.c 9.c 10.c \
 			  11.c 12.c 13.c
 
-SRCS_BONUS	= main_bonus.c parse_header.c parse_header_order.c 3.c 4_bonus.c 5.c 6.c 7.c 8.c 9.c 10.c \
+SRCS_BONUS	= main_bonus.c parse_header.c parse_header_order.c parse_headers.c player_movement_bonus.c render_column.c raycasting.c render_loop.c 8.c 9.c 10.c \
 			  11.c 12.c 13_bonus.c
 
 LIBFT = libft

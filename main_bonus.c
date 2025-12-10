@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main(3).c                                          :+:      :+:    :+:   */
+/*   main_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:19:57 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/09 16:21:11 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/10 18:04:18 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	main(int argc, char **argv)
 	g.posx = (double)g.init_player_x + 0.5;
 	g.posy = (double)g.init_player_y + 0.5;
 	init_player(&g, orient);
-	if (create_frame(&g) < 0)
+	if (create_frame_image(&g) < 0)
 		return (free_map(&g), free_config(&g), 1);
 	mlx_hook(g.window, 2, 1, key_press, &g);
 	mlx_hook(g.window, 3, 2, key_release, &g);

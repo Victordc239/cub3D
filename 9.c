@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:39:46 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/09 17:15:11 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/10 16:24:39 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,17 @@
 
 int	process_neighbor(t_game *g, char *visited, int *queue, size_t *tail)
 {
-	int	ny;
-	int	nx;
+	int	next_y;
+	int	next_x;
 
-	ny = (int)(g->npos / g->map_width);
-	nx = (int)(g->npos % g->map_width);
+	next_y = (int)(g->npos / g->map_width);
+	next_x = (int)(g->npos % g->map_width);
 	if (visited[g->npos])
 		return (0);
 	visited[g->npos] = 1;
-	if (g->map[ny][nx] == ' ')
+	if (g->map[next_y][next_x] == ' ')
 		return (write(2, "Error\nMap not closed\n", 21), -1);
-	if (g->map[ny][nx] != '1')
+	if (g->map[next_y][next_x] != '1')
 	{
 		queue[(*tail)++] = (int)g->npos;
 	}
