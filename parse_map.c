@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soraya <soraya@student.42.fr>              +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:41:06 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/11 01:24:19 by soraya           ###   ########.fr       */
+/*   Updated: 2025/12/11 17:13:58 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,17 @@ int	build_map(t_game *g, char **lines, size_t line_count)
 		return (-1);
 	}
 	i = 0;
-	g->y = 0;
+	g->row_y = 0;
 	g->map_width = 0;
 	while (i < line_count)
 	{
 		strip_newline(lines[i]);
-		g->map[g->y++] = lines[i];
+		g->map[g->row_y++] = lines[i];
 		if ((int)ft_strlen(lines[i]) > g->map_width)
 			g->map_width = ft_strlen(lines[i]);
 		i++;
 	}
-	g->map[g->y] = NULL;
+	g->map[g->row_y] = NULL;
 	return (free(lines), 0);
 }
 

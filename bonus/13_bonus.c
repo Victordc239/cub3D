@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:47:03 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 18:36:12 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 17:14:54 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ int	key_release(int keycode, void *param)
 	return (0);
 }
 
-int	mouse_move(int x, int y, void *param)
+int	mouse_move(int col_x, int row_y, void *param)
 {
 	t_game	*g;
 	int		dx;
@@ -93,9 +93,9 @@ int	mouse_move(int x, int y, void *param)
 	g = (t_game *)param;
 	if (!g)
 		return (0);
-	dx = x - g->mouse_last_x;
-	g->mouse_last_x = x;
-	g->mouse_last_y = y;
+	dx = col_x - g->mouse_last_x;
+	g->mouse_last_x = col_x;
+	g->mouse_last_y = row_y;
 	if (dx > -2 && dx < 2)
 		return (0);
 	if (dx > 50)

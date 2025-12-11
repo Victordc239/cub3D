@@ -6,32 +6,32 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:54:58 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 17:04:38 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 17:14:54 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	get_texture_pixel(t_texture *texture, int x, int y)
+int	get_texture_pixel(t_texture *texture, int col_x, int row_y)
 {
 	char	*pixel;
 
-	if (x < 0 || x >= texture->width || y < 0 || y >= texture->height)
+	if (col_x < 0 || col_x >= texture->width || row_y < 0 || row_y >= texture->height)
 		return (0);
-	pixel = texture->addr + (y * texture->line_len_byte + x
+	pixel = texture->addr + (row_y * texture->line_len_byte + col_x
 			* (texture->bit_by_pixel / 8));
 	return (*(unsigned int *)pixel);
 }
 
-void	draw_pixel_frame(t_game *g, int x, int y, unsigned int color)
+void	draw_pixel_frame(t_game *g, int col_x, int row_y, unsigned int color)
 {
 	char	*frame_pixel;
 
 	if (!g || !g->frame_addr)
 		return ;
-	if (x < 0 || x >= g->screen_w || y < 0 || y >= g->screen_h)
+	if (col_x < 0 || col_x >= g->screen_w || row_y < 0 || row_y >= g->screen_h)
 		return ;
-	frame_pixel = g->frame_addr + y * g->frame_line_len + x * (g->frame_bpp / 8);
+	frame_pixel = g->frame_addr + row_y * g->frame_line_len + col_x * (g->frame_bpp / 8);
 	*(unsigned int *)frame_pixel = color;
 }
 
@@ -59,7 +59,7 @@ void	render_column(t_game *g, t_render *r, t_texture *tex)
 		r->color = get_texture_pixel(tex, r->tex_x, r->tex_y);
 		if (r->side == 1)
 			r->color = ((r->color & 0xFEFEFE) >> 1);
-		draw_pixel_frame(g, r->x, r->draw_start, r->color);
+		draw_pixel_frame(g, r->col_x, r->draw_start, r->color);
 		r->draw_start++;
 	}
 }

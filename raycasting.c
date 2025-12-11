@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   render_frame(6).c                                  :+:      :+:    :+:   */
+/*   raycasting.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:55:45 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 17:47:59 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 17:14:54 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-void	init_render_vars(t_game *g, t_render *r, int x)
+void	init_render_vars(t_game *g, t_render *r, int col_x)
 {
-	r->x = x;
-	r->camera_x = 2.0 * x / (double)g->screen_w - 1.0;
+	r->col_x = col_x;
+	r->camera_x = 2.0 * col_x / (double)g->screen_w - 1.0;
 	r->ray_dir_x = g->dirx + g->planex * r->camera_x;
 	r->ray_dir_y = g->diry + g->planey * r->camera_x;
 	r->map_x = (int)g->posx;

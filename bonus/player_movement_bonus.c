@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:53:40 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 18:36:25 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 14:09:32 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ void	move_forward_back(t_game *g, double move_speed, int direction)
 	next_x = g->posx + g->dirx * move_speed * direction;
 	next_y = g->posy + g->diry * move_speed * direction;
 	if (next_y >= 0 && next_y < g->map_height && (int)g->posx >= 0
-		&& (int)g->posx < g->map_width && g->map[(int)next_y][(int)g->posx] != '1'
+		&& (int)g->posx < g->map_width
+		&& g->map[(int)next_y][(int)g->posx] != '1'
 		&& g->map[(int)next_y][(int)g->posx] != ' ')
 		g->posy = next_y;
 	if ((int)g->posy >= 0 && (int)g->posy < g->map_height && next_x >= 0

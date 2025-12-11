@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   9.c                                                :+:      :+:    :+:   */
+/*   12.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:58:28 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/02 17:40:06 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 16:21:23 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,9 +94,9 @@ int	parse(char **argv, t_game *g, char *orient)
 			write(2, "Error\nHeader\n", 13), -1);
 	if (parse_map(fd, first_map_line, g) < 0)
 		return (close(fd), free_config(g), -1);
-	if (check_empty_lines_in_map(g) < 0 || pad_map(g, 0) < 0
-		|| validate_map_chars(g) < 0 || check_map_closed(g) < 0
-		|| find_player(g, orient) < 0)
+	if (check_empty_lines_map(g) < 0 || complete_map_rows(g, 0) < 0
+		|| validate_map_chars(g) < 0 || validate_map_closed(g) < 0
+		|| init_player_pos(g, orient) < 0)
 		return (free_map(g), free_config(g), close(fd), -1);
 	return (close(fd), 0);
 }

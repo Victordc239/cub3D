@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   7.c                                                :+:      :+:    :+:   */
+/*   render_loop.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:57:02 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 18:25:40 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 17:14:54 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ int	create_frame_image(t_game *g)
 
 void	draw_frame_background(t_game *g)
 {
-	int				x;
-	int				y;
+	int				col_x;
+	int				row_y;
 	unsigned int	color_c;
 	unsigned int	color_f;
 
@@ -43,21 +43,21 @@ void	draw_frame_background(t_game *g)
 		return ;
 	color_c = (g->ceiling[0] << 16) | (g->ceiling[1] << 8) | g->ceiling[2];
 	color_f = (g->floor[0] << 16) | (g->floor[1] << 8) | g->floor[2];
-	y = 0;
-	while (y < g->screen_h)
+	row_y = 0;
+	while (row_y < g->screen_h)
 	{
-		x = 0;
-		while (x < g->screen_w)
+		col_x = 0;
+		while (col_x < g->screen_w)
 		{
-			if (y < g->screen_h / 2)
-				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
-						+ x * (g->frame_bpp / 8)) = color_c;
+			if (row_y < g->screen_h / 2)
+				*(unsigned int *)(g->frame_addr + row_y * g->frame_line_len
+						+ col_x * (g->frame_bpp / 8)) = color_c;
 			else
-				*(unsigned int *)(g->frame_addr + y * g->frame_line_len
-						+ x * (g->frame_bpp / 8)) = color_f;
-			x++;
+				*(unsigned int *)(g->frame_addr + row_y * g->frame_line_len
+						+ col_x * (g->frame_bpp / 8)) = color_f;
+			col_x++;
 		}
-		y++;
+		row_y++;
 	}
 }
 
@@ -65,10 +65,10 @@ void	render_frame(t_game *g, t_render *r, t_texture **tex)
 {
 	if (!g || !g->frame_img || !g->frame_addr)
 		return ;
-	r->x = 0;
-	while (r->x < g->screen_w)
+	r->col_x = 0;
+	while (r->col_x < g->screen_w)
 	{
-		init_render_vars(g, r, r->x);
+		init_render_vars(g, r, r->col_x);
 		init_ray_steps(g, r);
 		cast_ray(g, r);
 		calculate_wall_projection(g, r);
@@ -80,13 +80,13 @@ void	render_frame(t_game *g, t_render *r, t_texture **tex)
 		*tex = choose_wall_texture(g, r);
 		if (!(*tex) || !(*tex)->addr || (*tex)->width <= 0)
 		{
-			r->x++;
+			r->col_x++;
 			continue ;
 		}
 		r->tex_width = (*tex)->width;
 		r->tex_height = (*tex)->height;
 		render_column(g, r, *tex);
-		r->x++;
+		r->col_x++;
 	}
 }
 
