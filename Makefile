@@ -3,20 +3,20 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+         #
+#    By: soraya <soraya@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/26 13:49:21 by vdiez-cu          #+#    #+#              #
-#    Updated: 2025/12/10 18:29:14 by sofernan         ###   ########.fr        #
+#    Updated: 2025/12/11 01:26:56 by soraya           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		= cub3D
 
-SRCS		= main.c parse_header.c parse_header_order.c parse_headers.c player_movement.c render_column.c raycasting.c render_loop.c 8.c 9.c 10.c \
+SRCS		= main.c parse_header.c parse_header_order.c parse_headers.c player_movement.c render_column.c raycasting.c render_loop.c parse_map.c 9.c 10.c \
 			  11.c 12.c 13.c
 
-SRCS_BONUS	= main_bonus.c parse_header.c parse_header_order.c parse_headers.c player_movement_bonus.c render_column.c raycasting.c render_loop.c 8.c 9.c 10.c \
-			  11.c 12.c 13_bonus.c
+SRCS_BONUS	= ./bonus/main_bonus.c parse_header.c parse_header_order.c parse_headers.c ./bonus/player_movement_bonus.c render_column.c raycasting.c render_loop.c parse_map.c 9.c 10.c \
+			  11.c 12.c ./bonus/13_bonus.c
 
 LIBFT = libft
 LIBFT_DIR = libft/

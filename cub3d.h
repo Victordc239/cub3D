@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: soraya <soraya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/10 18:07:31 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 01:24:19 by soraya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ typedef struct s_render
 void		free_config(t_game *g);
 void		free_copy(char **copy);
 void		free_map(t_game *g);
-void		strip_nl(char *line);
+void		strip_newline(char *map_line);
 void		draw_frame_background(t_game *g);
 void		init_player(t_game *g, char orient);
 void		update_player(t_game *g, double delta);
@@ -184,8 +184,8 @@ int			parse(char **argv, t_game *g, char *orient);
 int			check_file_empty(const char *path);
 int			check_empty_lines_in_map(t_game *g);
 int			parse_header_order(const char *line, t_game *g, int *order);
-int			build_map_from_lines(t_game *g, char **lines, size_t count);
-int			grow_lines(char ***lines, size_t *cap, size_t count, char *line);
+int			build_map(t_game *g, char **lines, size_t line_count);
+int			resize_lines(char ***lines, size_t *lines_capacity, size_t line_count, char *map_line);
 int			check_all_visited(t_game *g, char *visited, size_t w, size_t h);
 int			bfs_from_start(t_game *g, char *visited, int *queue, size_t start);
 int			find_player_pos(t_game *g, int *out_py, int *out_px);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_header.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: soraya <soraya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:47:00 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 14:44:27 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/11 00:34:56 by soraya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	parse_texture_path(char **dest, const char *textures_path)
 	copy = ft_strdup(path);
 	if (!copy)
 		return (-1);
-	strip_nl(copy);
+	strip_newline(copy);
 	*dest = copy;
 	return (0);
 }
