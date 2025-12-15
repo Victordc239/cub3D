@@ -1,18 +1,16 @@
-NO ./textures/north3.xpm
-SO ./textures/south3.xpm
-WE ./textures/west3.xpm
-EA ./textures/east3.xpm
-F 108,11,132
-C 198,42,238
+NO ./textures/north7.xpm
+SO ./textures/south7.xpm
+WE ./textures/west9.xpm
+EA ./textures/east9.xpm
+F 232,23,220
+C 169,240,76
 
-11111111
-10000W01
-10111111
-101
-10111111
-10000001
-11111101
-     101
-11111101
-10000001
-11111111
+  11111
+  10101
+111000111
+100000001
+1100N0011
+100000001
+111000111
+  10101
+  11111

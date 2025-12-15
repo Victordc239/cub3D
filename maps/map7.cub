@@ -1,14 +1,16 @@
-NO ./textures/north4.xpm
-SO ./textures/south4.xpm
-WE ./textures/west4.xpm
-EA ./textures/east4.xpm
-F 183,115,62
-C 248,219,129
+NO ./textures/north2.xpm
+SO ./textures/south2.xpm
+WE ./textures/west2.xpm
+EA ./textures/east2.xpm
+F 115,2,45
+C 251,65,136
 
-1111111
-1000001
-1000001
-100S001
-1000001
-1000001
-1111111
+  111   111
+ 10001 10001
+1000001000001
+ 10000000001
+  100000001
+   100E001
+    10001
+     101
+      1
