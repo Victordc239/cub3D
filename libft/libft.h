@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victor <victor@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 14:03:09 by sofernan          #+#    #+#             */
-/*   Updated: 2025/11/16 15:49:25 by victor           ###   ########.fr       */
+/*   Updated: 2025/12/15 13:39:02 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ char		*ft_strjoin(char *s1, char const *s2);
 char		**ft_split(char const *s, char c);
 char		*ft_strchr(char const *s, int c);
 char		*ft_strdup(char const *s1);
-int		ft_strlen(char const *str);
+int			ft_strlen(char const *str);
 char		*ft_itoa(int n);
 
 void		*ft_memcpy(void *dst, const void *src, size_t n);
