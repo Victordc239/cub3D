@@ -1,19 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   validate_map.c                                     :+:      :+:    :+:   */
+/*   9.c                                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:39:46 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/15 13:33:45 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/11 13:36:00 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	process_neighbor(t_game *g, char *visited_cells, int *pending_cells,
-		size_t *tail)
+int	process_neighbor(t_game *g, char *visited_cells, int *pending_cells, size_t *tail)
 {
 	int	next_y;
 	int	next_x;
@@ -32,8 +31,7 @@ int	process_neighbor(t_game *g, char *visited_cells, int *pending_cells,
 	return (0);
 }
 
-int	process_neighbors(t_game *g, char *visited_cells, int *pending_cells,
-		size_t *tail)
+int	process_neighbors(t_game *g, char *visited_cells, int *pending_cells, size_t *tail)
 {
 	if ((g->y_neighbor + 1) < (size_t)g->map_height)
 	{
@@ -62,8 +60,7 @@ int	process_neighbors(t_game *g, char *visited_cells, int *pending_cells,
 	return (0);
 }
 
-int	validate_map(t_game *g, char *visited_cells, int *pending_cells,
-		size_t start_cell)
+int	validate_map(t_game *g, char *visited_cells, int *pending_cells, size_t start_cell)
 {
 	long	current_cell;
 	size_t	head;

@@ -6,17 +6,17 @@
 #    By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/26 13:49:21 by vdiez-cu          #+#    #+#              #
-#    Updated: 2025/12/11 16:27:52 by sofernan         ###   ########.fr        #
+#    Updated: 2025/12/15 14:03:43 by sofernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		= cub3D
 
 SRCS		= main.c parse_header.c parse_header_order.c parse_headers.c player_movement.c render_column.c raycasting.c render_loop.c parse_map.c \
-			  validate_map.c validate_map_closed.c parse_utils.c 12.c 13.c
+			  validate_map.c validate_map_closed.c parse_utils.c parse.c game_controls.c
 
 SRCS_BONUS	= ./bonus/main_bonus.c parse_header.c parse_header_order.c parse_headers.c ./bonus/player_movement_bonus.c render_column.c raycasting.c render_loop.c parse_map.c \
-			  validate_map.c validate_map_closed.c parse_utils.c 12.c ./bonus/13_bonus.c
+			  validate_map.c validate_map_closed.c parse_utils.c parse.c ./bonus/game_controls_bonus.c
 
 LIBFT = libft
 LIBFT_DIR = libft/
