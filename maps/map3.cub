@@ -1,16 +1,13 @@
-NO ./textures/north2.xpm
-SO ./textures/south2.xpm
-WE ./textures/west2.xpm
-EA ./textures/east2.xpm
-F 115,2,45
-C 251,65,136
+NO ./textures/north6.xpm
+SO ./textures/south6.xpm
+WE ./textures/west6.xpm
+EA ./textures/east6.xpm
+F 137,198,251
+C 77,67,224
 
-  111   111
- 10001 10001
-1000001000001
- 10000000001
-  100000001
-   100E001
-    10001
-     101
-      1
+11111111111
+10001010001
+10101000101
+1110W001101
+10001000101
+11111111111

@@ -1,16 +1,15 @@
-NO ./textures/north8.xpm
-SO ./textures/south8.xpm
-WE ./textures/west8.xpm
-EA ./textures/east8.xpm
-F 165,230,249
-C 165,230,249
+NO ./textures/north7.xpm
+SO ./textures/south7.xpm
+WE ./textures/west7.xpm
+EA ./textures/east7.xpm
+F 232,23,220
+C 169,240,76
 
-  11111
-  10001
-111000111
-100000001
-1000E0001
-100000001
-111000111
-  10001
-  11111
+11111111111
+10001010001
+10101000101
+10000000001
+1110N001101
+10000000001
+10001000101
+11111111111
