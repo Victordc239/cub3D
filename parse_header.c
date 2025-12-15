@@ -6,29 +6,11 @@
 /*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:47:00 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/15 14:27:21 by vdiez-cu         ###   ########.fr       */
+/*   Updated: 2025/12/15 15:59:27 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
-
-int	parse_texture_path(char **dest, const char *textures_path)
-{
-	const char	*path;
-	char		*copy;
-
-	path = textures_path + 2;
-	while (*path == ' ' || *path == '\t')
-		path++;
-	if (*path == '\0' || *path == '\n')
-		return (-1);
-	copy = ft_strdup(path);
-	if (!copy)
-		return (-1);
-	strip_newline(copy);
-	*dest = copy;
-	return (0);
-}
 
 int	parse_uint0_255(const char **rgb, int *rgb_number)
 {

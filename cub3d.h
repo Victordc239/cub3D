@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/15 15:30:59 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 16:04:36 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,8 @@ typedef struct s_render
 	double			denom;
 }					t_render;
 
+int			check_texture_path(const char *s);
+int			check_texture_extension(const char *s);
 int			parse_texture_path(char **dest, const char *textures_path);
 int			parse_uint0_255(const char **rgb, int *rgb_number);
 int			parse_color_value(const char *rgb_numbers, int rgb_number[3]);
