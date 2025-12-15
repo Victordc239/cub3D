@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:41:06 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/11 17:13:58 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 13:29:24 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ void	strip_newline(char *map_line)
 		map_line[len - 1] = '\0';
 }
 
-int	resize_lines(char ***lines, size_t *lines_capacity, size_t line_count, char *map_line)
+int	resize_lines(char ***lines, size_t *lines_capacity, size_t line_count,
+				char *map_line)
 {
 	size_t	new_capacity;
 	char	**new_lines;
