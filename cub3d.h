@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/15 14:41:48 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 15:28:32 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,64 +148,64 @@ int			is_empty_line(const char *line);
 int			is_header_line(const char *line);
 int			parse_headers(int fd, t_game *g, char **first_map_line);
 int			get_texture_pixel(t_texture *texture, int col_x, int row_y);
-
-int			check_file_extension(const char *fname);
-int			is_valid_char(char c, int walkable_char);
-int			validate_map_closed(t_game *g);
-int			validate_map_chars(t_game *g);
-int			parse_map(int fd, char *first_line, t_game *g);
-int			rotate_player_mouse(int col_x, int row_y, void *param);
-int			complete_map_rows(t_game *g, int row_y);
-int			init_player_pos(t_game *g, char *player_orientation);
-int			key_press(int keycode, void *param);
-int			close_game(void *param);
-int			load_texture(void *mlx, t_texture *texture, char *path);
 int			create_frame_image(t_game *g);
-int			key_release(int keycode, void *param);
 int			game_loop(void *param);
-int			parse(char **argv, t_game *g, char *orient);
-int			check_file_empty(const char *path);
-int			check_empty_lines_map(t_game *g);
 int			build_map(t_game *g, char **lines, size_t line_count);
+int			parse_map(int fd, char *first_line, t_game *g);
 int			find_player_pos(t_game *g, int *player_y, int *player_x);
+int			validate_map_closed(t_game *g);
+int			check_empty_lines_map(t_game *g);
+int			complete_map_rows(t_game *g, int row_y);
+int			is_valid_char(char c, int walkable_char);
+int			validate_map_chars(t_game *g);
+int			init_player_pos(t_game *g, char *player_orientation);
+int			check_file_extension(const char *fname);
+int			check_file_empty(const char *path);
+int			parse(char **argv, t_game *g, char *orient);
+int			close_game(void *param);
+int			key_press(int keycode, void *param);
+int			key_release(int keycode, void *param);
+int			rotate_player_mouse(int col_x, int row_y, void *param);
+int			load_texture(void *mlx, t_texture *texture, char *path);
 int			read_first_map_line(int fd, t_game *g,
 				char **first_map_line, int order[6]);
 int			process_headers(int fd, t_game *g,
 				char **first_map_line, int order[6]);
-
-int			resize_lines(char ***lines, size_t *lines_capacity, size_t line_count, char *map_line);
-int			check_all_cells_visited(t_game *g, char *visited_cells, size_t width, size_t height);
-int			validate_map(t_game *g, char *visited_cells, int *pending_cells, size_t start_cell);
+int			resize_lines(char ***lines, size_t *lines_capacity,
+				size_t line_count, char *map_line);
 int			process_neighbor(t_game *g, char *visited_cells, int *pending_cells,
 				size_t *tail);
-int			init_player_pos_in_copy(char **copy, int map_height, int *out_y,
-				int *out_x);
-int			process_neighbors(t_game *g, char *visited_cells, int *pending_cells,
-				size_t *tail);
+int			process_neighbors(t_game *g, char *visited_cells,
+				int *pending_cells, size_t *tail);
+int			validate_map(t_game *g, char *visited_cells, int *pending_cells,
+				size_t start_cell);
 int			alloc_bfs_data(long long total_cells, char **visited_cells_out,
 				int **pending_cells_out);
+int			check_all_cells_visited(t_game *g, char *visited_cells,
+				size_t width, size_t height);
+int			init_player_pos_in_copy(char **copy, int map_height, int *out_y,
+				int *out_x);
 
 void		move_forward_back(t_game *g, double move_speed, int direction);
 void		move_left_right(t_game *g, double move_speed, int direction);
 void		rotate_player(t_game *g, double angle);
 void		update_player(t_game *g, double delta);
-void		draw_pixel_frame(t_game *g, int col_x, int row_y, unsigned int color);
 void		render_column(t_game *g, t_render *r, t_texture *tex);
 void		init_render_vars(t_game *g, t_render *r, int col_x);
 void		init_ray_steps(t_game *g, t_render *r);
 void		cast_ray(t_game *g, t_render *r);
 void		calculate_wall_projection(t_game *g, t_render *r);
-
-void		free_config(t_game *g);
-void		free_copy(char **copy);
-void		free_map(t_game *g);
-void		strip_newline(char *map_line);
 void		draw_frame_background(t_game *g);
-void		init_player(t_game *g, char orient);
 void		render_frame(t_game *g, t_render *r, t_texture **tex);
+void		strip_newline(char *map_line);
 void		init_struct_g(t_game *g);
-void		free_image(void *mlx, void **img_ptr, char **addr_ptr);
 void		clear_gnl_fd(int fd);
+void		free_map(t_game *g);
+void		free_image(void *mlx, void **img_ptr, char **addr_ptr);
+void		free_config(t_game *g);
+void		init_player(t_game *g, char orient);
+void		draw_pixel_frame(t_game *g, int col_x, int row_y,
+				unsigned int color);
 
 char		*read_rest_of_file(int fd);
 
