@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   validate_map_closed.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:40:34 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/11 17:11:11 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 14:17:54 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ int	find_player_pos(t_game *g, int *player_y, int *player_x)
 	return (-1);
 }
 
-int	alloc_bfs_data(long long total_cells, char **visited_cells_out, int **pending_cells_out)
+int	alloc_bfs_data(long long total_cells, char **visited_cells_out,
+		int **pending_cells_out)
 {
 	*visited_cells_out = NULL;
 	*pending_cells_out = NULL;
@@ -56,7 +57,8 @@ int	alloc_bfs_data(long long total_cells, char **visited_cells_out, int **pendin
 	return (0);
 }
 
-int	check_all_cells_visited(t_game *g, char *visited_cells, size_t width, size_t height)
+int	check_all_cells_visited(t_game *g, char *visited_cells, size_t width,
+		size_t height)
 {
 	size_t	row_y;
 	size_t	col_x;
@@ -101,7 +103,8 @@ int	validate_map_closed(t_game *g)
 	if (validate_map(g, visited_cells, pending_cells,
 			((size_t)player_y * g->map_width + (size_t)player_x)) < 0)
 		return (free(pending_cells), free(visited_cells), -1);
-	if (check_all_cells_visited(g, visited_cells, g->map_width, g->map_height) < 0)
+	if (check_all_cells_visited(g, visited_cells, g->map_width,
+			g->map_height) < 0)
 		return (free(pending_cells), free(visited_cells), -1);
 	return (free(pending_cells), free(visited_cells), 0);
 }

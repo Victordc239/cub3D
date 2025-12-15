@@ -1,18 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   9.c                                                :+:      :+:    :+:   */
+/*   validate_map.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:39:46 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/11 13:36:00 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 14:39:55 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	process_neighbor(t_game *g, char *visited_cells, int *pending_cells, size_t *tail)
+int	process_neighbor(t_game *g, char *visited_cells, int *pending_cells,
+		size_t *tail)
 {
 	int	next_y;
 	int	next_x;
@@ -31,7 +32,8 @@ int	process_neighbor(t_game *g, char *visited_cells, int *pending_cells, size_t 
 	return (0);
 }
 
-int	process_neighbors(t_game *g, char *visited_cells, int *pending_cells, size_t *tail)
+int	process_neighbors(t_game *g, char *visited_cells, int *pending_cells,
+		size_t *tail)
 {
 	if ((g->y_neighbor + 1) < (size_t)g->map_height)
 	{
@@ -60,7 +62,8 @@ int	process_neighbors(t_game *g, char *visited_cells, int *pending_cells, size_t
 	return (0);
 }
 
-int	validate_map(t_game *g, char *visited_cells, int *pending_cells, size_t start_cell)
+/* int	validate_map(t_game *g, char *visited_cells, int *pending_cells,
+		size_t start_cell)
 {
 	long	current_cell;
 	size_t	head;
@@ -77,6 +80,36 @@ int	validate_map(t_game *g, char *visited_cells, int *pending_cells, size_t star
 		g->x_neighbor = (int)(current_cell % (long)g->map_width);
 		if (g->map[g->y_neighbor][g->x_neighbor] == ' ')
 			return (write(2, "Error\nMap not closed\n", 21), -1);
+		if (process_neighbors(g, visited_cells, pending_cells, &tail) < 0)
+			return (-1);
+	}
+	return (0);
+} */
+
+int	validate_map(t_game *g, char *visited_cells, int *pending_cells,
+		size_t start_cell)
+{
+	long	current_cell;
+	size_t	head;
+	size_t	tail;
+
+	head = 0;
+	tail = 0;
+	visited_cells[start_cell] = 1;
+	pending_cells[tail++] = (int)start_cell;
+	while (head < tail)
+	{
+		current_cell = pending_cells[head++];
+		g->y_neighbor = (int)(current_cell / (long)g->map_width);
+		g->x_neighbor = (int)(current_cell % (long)g->map_width);
+		if (g->map[g->y_neighbor][g->x_neighbor] == ' ')
+			return (write(2, "Error\nMap not closed\n", 21), -1);
+		if (g->y_neighbor == 0 || g->y_neighbor == (size_t)g->map_height - 1
+			|| g->x_neighbor == 0 || g->x_neighbor == (size_t)g->map_width - 1)
+		{
+			if (g->map[g->y_neighbor][g->x_neighbor] != '1')
+				return (write(2, "Error\nMap not closed\n", 21), -1);
+		}
 		if (process_neighbors(g, visited_cells, pending_cells, &tail) < 0)
 			return (-1);
 	}

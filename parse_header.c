@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_header.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soraya <soraya@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:47:00 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/11 00:34:56 by soraya           ###   ########.fr       */
+/*   Updated: 2025/12/15 14:27:21 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	parse_texture_path(char **dest, const char *textures_path)
 	const char	*path;
 	char		*copy;
 
-	path = textures_path;
+	path = textures_path + 2;
 	while (*path == ' ' || *path == '\t')
 		path++;
 	if (*path == '\0' || *path == '\n')
@@ -55,7 +55,7 @@ int	parse_color_value(const char *rgb_numbers, int rgb_number[3])
 {
 	const char	*rgb;
 
-	rgb = rgb_numbers;
+	rgb = rgb_numbers + 1;
 	while (*rgb == ' ' || *rgb == '\t')
 		rgb++;
 	if (parse_uint0_255(&rgb, &rgb_number[0]) < 0)
@@ -79,13 +79,17 @@ int	parse_color_value(const char *rgb_numbers, int rgb_number[3])
 
 int	process_header(int id, t_game *g, char *header_line)
 {
-	if ((id == 0 && (g->has_no || parse_texture_path(&g->no, header_line + 2) < 0))
-		|| (id == 1 && (g->has_so || parse_texture_path(&g->so, header_line + 2) < 0))
-		|| (id == 2 && (g->has_we || parse_texture_path(&g->we, header_line + 2) < 0))
-		|| (id == 3 && (g->has_ea || parse_texture_path(&g->ea, header_line + 2) < 0))
-		|| (id == 4 && (g->has_f || parse_color_value(header_line + 1, g->floor) < 0))
+	if ((id == 0 && (g->has_no || parse_texture_path(&g->no, header_line) < 0))
+		|| (id == 1 && (g->has_so || parse_texture_path(&g->so,
+					header_line) < 0))
+		|| (id == 2 && (g->has_we || parse_texture_path(&g->we,
+					header_line) < 0))
+		|| (id == 3 && (g->has_ea || parse_texture_path(&g->ea,
+					header_line) < 0))
+		|| (id == 4 && (g->has_f || parse_color_value(header_line,
+					g->floor) < 0))
 		|| (id == 5 && (g->has_c
-				|| parse_color_value(header_line + 1, g->ceiling) < 0)))
+				|| parse_color_value(header_line, g->ceiling) < 0)))
 		return (-1);
 	if (id == 0)
 		g->has_no = 1;
