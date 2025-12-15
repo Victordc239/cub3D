@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_header_order.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 16:49:37 by sofernan          #+#    #+#             */
-/*   Updated: 2025/12/10 14:00:04 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 13:28:01 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,23 @@
 
 int	get_header_id(const char *header_line)
 {
-	if (ft_strncmp(header_line, "NO", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
+	if (ft_strncmp(header_line, "NO", 2) == 0
+		&& (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (0);
-	if (ft_strncmp(header_line, "SO", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
+	if (ft_strncmp(header_line, "SO", 2) == 0
+		&& (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (1);
-	if (ft_strncmp(header_line, "WE", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
+	if (ft_strncmp(header_line, "WE", 2) == 0
+		&& (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (2);
-	if (ft_strncmp(header_line, "EA", 2) == 0 && (header_line[2] == ' ' || header_line[2] == '\t'))
+	if (ft_strncmp(header_line, "EA", 2) == 0
+		&& (header_line[2] == ' ' || header_line[2] == '\t'))
 		return (3);
-	if (header_line[0] == 'F' && (header_line[1] == ' ' || header_line[1] == '\t'))
+	if (header_line[0] == 'F'
+		&& (header_line[1] == ' ' || header_line[1] == '\t'))
 		return (4);
-	if (header_line[0] == 'C' && (header_line[1] == ' ' || header_line[1] == '\t'))
+	if (header_line[0] == 'C'
+		&& (header_line[1] == ' ' || header_line[1] == '\t'))
 		return (5);
 	return (-1);
 }
