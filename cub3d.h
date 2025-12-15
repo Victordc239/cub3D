@@ -6,7 +6,7 @@
 /*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/15 15:28:32 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 15:30:59 by sofernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,8 @@
 
 # include <unistd.h>
 # include <stdio.h>
-# include <limits.h>
 # include <errno.h>
 # include <fcntl.h>
-# include <ctype.h>
 # include <string.h>
 # include <stdlib.h>
 # include <math.h>
