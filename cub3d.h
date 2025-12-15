@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sofernan <sofernan@student.42madrid.es>    +#+  +:+       +#+        */
+/*   By: vdiez-cu <vdiez-cu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/13 14:20:21 by vdiez-cu          #+#    #+#             */
-/*   Updated: 2025/12/11 18:08:14 by sofernan         ###   ########.fr       */
+/*   Updated: 2025/12/15 13:36:18 by vdiez-cu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,6 @@ void		strip_newline(char *map_line);
 void		draw_frame_background(t_game *g);
 void		init_player(t_game *g, char orient);
 void		update_player(t_game *g, double delta);
-void		draw_pixel_frame(t_game *g, int col_x, int row_y, unsigned int color);
 void		render_frame(t_game *g, t_render *r, t_texture **tex);
 void		init_struct_g(t_game *g);
 void		move_left_right(t_game *g, double move_speed, int direction);
@@ -157,6 +156,8 @@ void		init_ray_steps(t_game *g, t_render *r);
 void		cast_ray(t_game *g, t_render *r);
 void		calculate_wall_projection(t_game *g, t_render *r);
 void		render_column(t_game *g, t_render *r, t_texture *tex);
+void		draw_pixel_frame(t_game *g, int col_x, int row_y,
+				unsigned int color);
 
 int			extension_is_cub(const char *fname);
 int			is_valid_char(char c, int walkable_char);
@@ -185,17 +186,20 @@ int			check_file_empty(const char *path);
 int			check_empty_lines_map(t_game *g);
 int			parse_header_order(const char *line, t_game *g, int *order);
 int			build_map(t_game *g, char **lines, size_t line_count);
-int			resize_lines(char ***lines, size_t *lines_capacity, size_t line_count, char *map_line);
-int			check_all_cells_visited(t_game *g, char *visited_cells, size_t width, size_t height);
-int			validate_map(t_game *g, char *visited_cells, int *pending_cells, size_t start_cell);
 int			find_player_pos(t_game *g, int *player_y, int *player_x);
 int			process_header(int id, t_game *g, char *header_line);
+int			check_all_cells_visited(t_game *g, char *visited_cells,
+				size_t width, size_t height);
+int			validate_map(t_game *g, char *visited_cells, int *pending_cells,
+				size_t start_cell);
+int			resize_lines(char ***lines, size_t *lines_capacity,
+				size_t line_count, char *map_line);
 int			process_neighbor(t_game *g, char *visited_cells, int *pending_cells,
 				size_t *tail);
 int			init_player_pos_in_copy(char **copy, int map_height, int *out_y,
 				int *out_x);
-int			process_neighbors(t_game *g, char *visited_cells, int *pending_cells,
-				size_t *tail);
+int			process_neighbors(t_game *g, char *visited_cells,
+				int *pending_cells, size_t *tail);
 int			process_headers(int fd, t_game *g,
 				char **first_map_line, int order[6]);
 int			read_first_map_line(int fd, t_game *g,
